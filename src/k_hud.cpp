@@ -3288,6 +3288,8 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	UINT8 numbers[3];
 	INT32 splitflags = V_SNAPTOBOTTOM|V_SNAPTOLEFT|V_SPLITSCREEN;
 	INT32 fy = LAPS_Y-14;
+	INT32 stickerwidth = 42;
+	INT32 secondoff = 41;
 
 	if (battleprisons)
 	{
@@ -3306,14 +3308,18 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 			case 2: // Kilometers
 				convSpeed = FixedDiv(FixedMul(stplyr->speed, 142371), mapobjectscale) / FRACUNIT; // 2.172409058
 				labeln = 1;
+				stickerwidth = 84;
+				secondoff = 43;
 				break;
 			case 3: // Miles
 				convSpeed = FixedDiv(FixedMul(stplyr->speed, 88465), mapobjectscale) / FRACUNIT; // 1.349868774
 				labeln = 2;
+				stickerwidth = 82;
 				break;
 			case 4: // Fracunits
 				convSpeed = FixedDiv(stplyr->speed, mapobjectscale) / FRACUNIT; // 1.0. duh.
 				labeln = 3;
+				stickerwidth = 82;
 				break;
 		}
 	}
@@ -3340,11 +3346,31 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	}
 
 	using srb2::Draw;
-	Draw(LAPS_X+7, fy+1).flags(V_HUDTRANS|V_SLIDEIN|splitflags).align(Draw::Align::kCenter).width(42).small_sticker();
+
+	Draw(LAPS_X+7, fy+1).flags(V_HUDTRANS|V_SLIDEIN|splitflags).align(Draw::Align::kCenter).width(stickerwidth).small_sticker();
 	V_DrawScaledPatch(LAPS_X+7, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]]);
 	V_DrawScaledPatch(LAPS_X+13, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]]);
 	V_DrawScaledPatch(LAPS_X+19, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]]);
 	V_DrawScaledPatch(LAPS_X+29, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln]);
+
+	//still draw percentage if we're using something else
+	if (cv_kartspeedometer.value != 1)
+	{
+		//Copy shit lmao
+		convSpeed = (stplyr->speed * 100) / K_GetKartSpeed(stplyr, false, true); // Based on top speed!
+		labeln = 0;
+		if (convSpeed > 999 || convSpeed < 0)
+			convSpeed = 999;
+		numbers[0] = ((convSpeed / 100) % 10);
+		numbers[1] = ((convSpeed / 10) % 10);
+		numbers[2] = (convSpeed % 10);
+
+		V_DrawScaledPatch(LAPS_X+7+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]]);
+		V_DrawScaledPatch(LAPS_X+13+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]]);
+		V_DrawScaledPatch(LAPS_X+19+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]]);
+		V_DrawScaledPatch(LAPS_X+29+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln]);
+
+	}
 
 	K_drawKartAccessibilityIcons(gametypeinfoshown, 56);
 }

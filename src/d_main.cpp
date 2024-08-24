@@ -2246,7 +2246,7 @@ void D_SRB2Main(void)
 			D_MapChange(pstartmap, gametype, (cv_kartencore.value == 1), true, 0, false, false);
 		}
 	}
-	else if (M_CheckParm("-skipintro"))
+	else if (true) //(M_CheckParm("-skipintro"))
 	{
 		F_StartTitleScreen();
 		CV_StealthSetValue(&cv_currprofile, -1);
