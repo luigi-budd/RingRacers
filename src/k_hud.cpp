@@ -2535,7 +2535,15 @@ void PositionFacesInfo::draw_1p()
 			else
 				colormap = R_GetTranslationColormap(workingskin, static_cast<skincolornum_t>(players[rankplayer[i]].mo->color), GTC_CACHE);
 
-			V_DrawMappedPatch(FACE_X + xoff, Y + yoff, V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag, faceprefix[workingskin][FACE_RANK], colormap);
+			//hires ranking portraits
+			//V_DrawMappedPatch(FACE_X + xoff, Y + yoff, V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag, faceprefix[workingskin][FACE_RANK], colormap);
+			V_DrawFixedPatch((FACE_X + xoff)<<FRACBITS,
+				(Y + yoff)<<FRACBITS,
+				FRACUNIT >> 1,
+				V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag,
+				faceprefix[workingskin][FACE_WANTED], colormap
+			);
+			//(x)<<FRACBITS, (y)<<FRACBITS, FRACUNIT, s, p, c)
 
 			if (LUA_HudEnabled(hud_battlebumpers))
 			{
@@ -3290,6 +3298,7 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	INT32 fy = LAPS_Y-14;
 	INT32 stickerwidth = 42;
 	INT32 secondoff = 41;
+	UINT8 *colormap;
 
 	if (battleprisons)
 	{
@@ -3322,6 +3331,11 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 				stickerwidth = 82;
 				break;
 		}
+
+		if (K_TripwirePass(stplyr))
+		{
+			colormap = R_GetTranslationColormap(TC_RAINBOW, static_cast<skincolornum_t>(leveltime % FIRSTSUPERCOLOR), GTC_CACHE);
+		}
 	}
 
 	// Don't overflow
@@ -3348,10 +3362,12 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	using srb2::Draw;
 
 	Draw(LAPS_X+7, fy+1).flags(V_HUDTRANS|V_SLIDEIN|splitflags).align(Draw::Align::kCenter).width(stickerwidth).small_sticker();
-	V_DrawScaledPatch(LAPS_X+7, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]]);
-	V_DrawScaledPatch(LAPS_X+13, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]]);
-	V_DrawScaledPatch(LAPS_X+19, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]]);
-	V_DrawScaledPatch(LAPS_X+29, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln]);
+	//fuck you kkd
+	//V_DrawScaledPatch(LAPS_X+7, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]],colormap);
+	V_DrawFixedPatch((LAPS_X+7)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]],colormap);
+	V_DrawFixedPatch((LAPS_X+13)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]],colormap);
+	V_DrawFixedPatch((LAPS_X+19)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]],colormap);
+	V_DrawFixedPatch((LAPS_X+29)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
 
 	//still draw percentage if we're using something else
 	if (cv_kartspeedometer.value != 1)
@@ -3365,11 +3381,16 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 		numbers[1] = ((convSpeed / 10) % 10);
 		numbers[2] = (convSpeed % 10);
 
-		V_DrawScaledPatch(LAPS_X+7+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]]);
-		V_DrawScaledPatch(LAPS_X+13+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]]);
-		V_DrawScaledPatch(LAPS_X+19+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]]);
-		V_DrawScaledPatch(LAPS_X+29+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln]);
-
+		V_DrawFixedPatch((LAPS_X+7+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]],colormap);
+		V_DrawFixedPatch((LAPS_X+13+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]],colormap);
+		V_DrawFixedPatch((LAPS_X+19+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]],colormap);
+		V_DrawFixedPatch((LAPS_X+29+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
+		/*
+		V_DrawScaledPatch(LAPS_X+7+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]],colormap);
+		V_DrawScaledPatch(LAPS_X+13+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]],colormap);
+		V_DrawScaledPatch(LAPS_X+19+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]],colormap);
+		V_DrawScaledPatch(LAPS_X+29+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
+		*/
 	}
 
 	K_drawKartAccessibilityIcons(gametypeinfoshown, 56);

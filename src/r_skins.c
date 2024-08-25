@@ -42,7 +42,11 @@
 #endif
 
 INT32 numskins = 0;
+INT32 numallskins = 0;
+INT32 numlocalskins = 0;
 skin_t skins[MAXSKINS];
+skin_t localskins[MAXSKINS];
+skin_t allskins[MAXSKINS*2];
 
 unloaded_skin_t *unloadedskins = NULL;
 
@@ -341,6 +345,38 @@ INT32 R_SkinAvailable(const char *name)
 	return R_SkinAvailableEx(name, true);
 }
 
+// returns true if the skin name is found (loaded from pwad)
+// warning return -1 if not found
+INT32 R_AnySkinAvailable(const char *name)
+{
+	INT32 i;
+
+	for (i = 0; i < numallskins; i++)
+	{
+		if (stricmp(allskins[i].name,name)==0)
+			return i;
+	}
+	return -1;
+}
+
+INT32 R_LocalSkinAvailable(const char *name, boolean local)
+{
+	INT32 i;
+
+	if (local)
+	{
+		for (i = 0; i < numlocalskins; i++)
+		{
+			if (stricmp(localskins[i].name,name)==0)
+				return i;
+		}
+		return -1;
+	}
+	else
+		return R_SkinAvailable(name);
+}
+
+
 INT32 R_SkinAvailableEx(const char *name, boolean demoskins)
 {
 	INT32 i;
@@ -482,6 +518,67 @@ void SetPlayerSkin(INT32 playernum, const char *skinname)
 		CONS_Alert(CONS_WARNING, M_GetText("Player %d (%s) skin '%s' not found\n"), playernum, player_names[playernum], skinname);
 
 	SetSkin(player, GetPlayerDefaultSkin(playernum));
+}
+
+void SetLocalPlayerSkin(INT32 playernum, const char *skinname, consvar_t *cvar)
+{
+	player_t *player = &players[playernum];
+	INT32 i;
+
+	if (strcasecmp(skinname, "none"))
+	{
+		for (i = 0; i < numlocalskins; i++)
+		{
+			// search in the skin list
+			if (stricmp(localskins[i].name, skinname) == 0)
+			{
+				player->localskin = 1 + i;
+				player->skinlocal = true;
+				if (player->mo)
+				{
+					player->mo->localskin = &localskins[i];
+					player->mo->skinlocal = true;
+				}
+				break;
+			}
+		}
+		for (i = 0; i < numskins; i++)
+		{
+			// search in the skin list
+			if (stricmp(skins[i].name, skinname) == 0)
+			{
+				player->localskin = 1 + i;
+				player->skinlocal = false;
+				if (player->mo)
+				{
+					player->mo->localskin = &skins[i];
+					player->mo->skinlocal = false;
+				}
+				break;
+			}
+		}
+	}
+	else
+	{
+		player->localskin = 0;
+		player->skinlocal = false;
+		if (player->mo)
+		{
+			player->mo->localskin = 0;
+			player->mo->skinlocal = false;
+		}
+	}
+
+	if (cvar != NULL) {
+		if (player->localskin > 0) {
+			CV_StealthSet(&cv_fakelocalskin, ( (player->skinlocal) ? localskins : skins )[player->localskin - 1].name);
+			CV_StealthSet(cvar, ( (player->skinlocal) ? localskins : skins )[player->localskin - 1].name);
+		}
+		else {
+			CV_StealthSet(&cv_fakelocalskin, "none");
+			CV_StealthSet(cvar, "none");
+		}
+	}
 }
 
 // Same as SetPlayerSkin, but uses the skin #.
