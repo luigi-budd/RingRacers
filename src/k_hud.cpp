@@ -3300,6 +3300,9 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	INT32 secondoff = 41;
 	UINT8 *colormap;
 
+	//Just set something here for now
+	colormap = R_GetTranslationColormap(TC_DEFAULT,SKINCOLOR_GREEN,GTC_CACHE);
+
 	if (battleprisons)
 	{
 		fy -= 2;
@@ -3385,15 +3388,9 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 		V_DrawFixedPatch((LAPS_X+13+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]],colormap);
 		V_DrawFixedPatch((LAPS_X+19+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]],colormap);
 		V_DrawFixedPatch((LAPS_X+29+secondoff)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
-		/*
-		V_DrawScaledPatch(LAPS_X+7+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[0]],colormap);
-		V_DrawScaledPatch(LAPS_X+13+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[1]],colormap);
-		V_DrawScaledPatch(LAPS_X+19+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_facenum[numbers[2]],colormap);
-		V_DrawScaledPatch(LAPS_X+29+secondoff, fy, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
-		*/
 	}
 
-	K_drawKartAccessibilityIcons(gametypeinfoshown, 56);
+	K_drawKartAccessibilityIcons(gametypeinfoshown, 56+secondoff);
 }
 
 static void K_drawBlueSphereMeter(boolean gametypeinfoshown)
