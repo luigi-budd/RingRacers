@@ -115,8 +115,11 @@ extern CV_PossibleValue_t Forceskin_cons_t[];
 
 // Loading
 void R_InitSkins(void);
-void R_AddSkins(UINT16 wadnum, boolean mainfile);
+void R_AddSkins(UINT16 wadnum, boolean mainfile, boolean local);
 void R_PatchSkins(UINT16 wadnum, boolean mainfile);
+
+//Localskin
+boolean R_MobjHasAnySkin(mobj_t *mo);
 
 // Access
 INT32 R_SkinAvailable(const char *name);

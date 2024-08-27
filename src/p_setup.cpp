@@ -9448,7 +9448,7 @@ UINT16 P_PartialAddWadFile(const char *wadfilename, boolean local)
 	//
 	// look for skins
 	//
-	R_AddSkins(wadnum, false); // faB: wadfile index in wadfiles[]
+	R_AddSkins(wadnum, false, local); // faB: wadfile index in wadfiles[]
 	R_PatchSkins(wadnum, false); // toast: PATCH PATCH
 
 	//

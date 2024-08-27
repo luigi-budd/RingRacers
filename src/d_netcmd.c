@@ -4728,7 +4728,7 @@ static void Command_GLocalSkin (void)
 		}
 		else
 		{
-			//SetLocalPlayerSkin(consoleplayer, fuck, &cv_localskin);
+			SetLocalPlayerSkin(consoleplayer, fuck, &cv_localskin);
 			CONS_Printf("Successfully applied localskin.\n");
 
 			Z_Free(fuck);

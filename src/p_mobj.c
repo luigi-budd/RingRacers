@@ -114,7 +114,7 @@ static inline INT32 randomframe (mobj_t *mobj, INT32 n)
 static void P_SetupStateAnimation(mobj_t *mobj, state_t *st)
 {
 	INT32 animlength = (mobj->sprite == SPR_PLAY && mobj->skin)
-		? (INT32)(((skin_t *)mobj->skin)->sprites[mobj->sprite2].numframes) - 1
+		? (INT32)(((mobj->localskin) ? ((skin_t *)mobj->localskin) : ((skin_t *)mobj->skin))->sprites[mobj->sprite2].numframes) - 1
 		: st->var1;
 
 	if (!(st->frame & FF_ANIMATE))

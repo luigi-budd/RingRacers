@@ -2732,19 +2732,20 @@ static void K_RegularVoiceTimers(player_t *player)
 
 static UINT8 K_ObjectToSkinIDForSounds(mobj_t *source)
 {
+	
 	if (source->player)
-		return source->player->skin;
+		return (source->player->localskin) ? ((skin_t *)source->localskin) - localskins : source->player->skin;
 
 	if (!source->skin)
 		return MAXSKINS;
 
-	return ((skin_t *)source->skin)-skins;
+	return ((skin_t *)((source->localskin) ? source->localskin : source->skin))-((source->localskin) ? localskins : skins);
 }
 
 static void K_PlayGenericTastefulTaunt(mobj_t *source, sfxenum_t sfx_id)
 {
 	UINT8 skinid = K_ObjectToSkinIDForSounds(source);
-	if (skinid >= numskins)
+	if (skinid >= (source->localskin ? numlocalskins : numskins))
 		return;
 
 	boolean tasteful = (!source->player || !source->player->karthud[khud_tauntvoices]);
@@ -2783,7 +2784,7 @@ void K_PlayBoostTaunt(mobj_t *source)
 void K_PlayOvertakeSound(mobj_t *source)
 {
 	UINT8 skinid = K_ObjectToSkinIDForSounds(source);
-	if (skinid >= numskins)
+	if (skinid >= (source->localskin ? numlocalskins : numskins))
 		return;
 
 	boolean tasteful = (!source->player || !source->player->karthud[khud_voices]);
@@ -2808,8 +2809,11 @@ void K_PlayOvertakeSound(mobj_t *source)
 static void K_PlayGenericCombatSound(mobj_t *source, mobj_t *other, sfxenum_t sfx_id)
 {
 	UINT8 skinid = K_ObjectToSkinIDForSounds(source);
-	if (skinid >= numskins)
+	if (skinid >= (source->localskin ? numlocalskins : numskins))
+	{	
+		CONS_Printf("Skinid out of range\n");
 		return;
+	}
 
 	boolean alwaysHear = false;
 
@@ -2878,7 +2882,7 @@ void K_TryHurtSoundExchange(mobj_t *victim, mobj_t *attacker)
 void K_PlayPowerGloatSound(mobj_t *source)
 {
 	UINT8 skinid = K_ObjectToSkinIDForSounds(source);
-	if (skinid >= numskins)
+	if (skinid >= (source->localskin ? numlocalskins : numskins))
 		return;
 
 	if (
@@ -2896,7 +2900,7 @@ void K_PlayPowerGloatSound(mobj_t *source)
 void P_PlayVictorySound(mobj_t *source)
 {
 	UINT8 skinid = K_ObjectToSkinIDForSounds(source);
-	if (skinid >= numskins)
+	if (skinid >= (source->localskin ? numlocalskins : numskins))
 		return;
 
 	if (
@@ -8043,7 +8047,7 @@ static void K_UpdateEngineSounds(player_t *player)
 	INT32 targetsnd = 0;
 	INT32 i;
 
-	if (leveltime < 8 || player->spectator || gamestate != GS_LEVEL || player->exiting)
+	if (leveltime || player->spectator || gamestate != GS_LEVEL || player->exiting)
 	{
 		// Silence the engines, and reset sound number while we're at it.
 		player->karthud[khud_enginesnd] = 0;
