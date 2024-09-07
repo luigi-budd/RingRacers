@@ -4538,18 +4538,17 @@ static void Command_Addfile(void)
 			else // file not found
 				continue;
 
-			if (!musiconly)
+			/*
+			for (i = 0; i < numwadfiles; i++)
 			{
-				for (i = 0; i < numwadfiles; i++)
+				if (!memcmp(wadfiles[i]->md5sum, md5sum, 16))
 				{
-					if (!memcmp(wadfiles[i]->md5sum, md5sum, 16))
-					{
-						CONS_Alert(CONS_ERROR, M_GetText("%s is already loaded\n"), fn);
-						valid = false;
-						break;
-					}
+					CONS_Alert(CONS_ERROR, M_GetText("%s is already loaded\n"), fn);
+					valid = false;
+					break;
 				}
 			}
+			*/
 			if (valid == false)
 			{
 				continue;

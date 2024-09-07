@@ -839,6 +839,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	//
 	W_MakeFileMD5(filename, md5sum);
 
+	/*
 	for (i = 0; i < numwadfiles; i++)
 	{
 		if (!memcmp(wadfiles[i]->md5sum, md5sum, 16))
@@ -849,6 +850,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 			return W_InitFileError(filename, false);
 		}
 	}
+	*/
 #endif
 
 	// Do this immediately before anything of consequence that invalidates gamedata can happen.
