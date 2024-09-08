@@ -508,23 +508,6 @@ void S_StartSoundAtVolume(const void *origin_p, sfxenum_t sfx_id, INT32 volume)
 
 	sfx = &S_sfx[sfx_id];
 
-	CONS_Printf(va("SKS: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
-		SKSKWIN,
-		SKSKLOSE,
-		SKSKPAN1,
-		SKSKPAN2,
-		SKSKATK1,
-		SKSKATK2,
-		SKSKBST1,
-		SKSKBST2,
-		SKSKSLOW,
-		SKSKHITM,
-		SKSKPOWR
-	));
-
-	CONS_Printf(va("skinsound: %d\n",sfx->skinsound));
-	CONS_Printf(va("soundname: %s\n",sfx->name));
-
 	if (sfx->skinsound != -1 && origin && (origin->player || origin->skin ))
 	{
 		// redirect player sound to the sound in the skin table
