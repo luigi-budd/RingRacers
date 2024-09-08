@@ -2734,9 +2734,7 @@ static UINT8 K_ObjectToSkinIDForSounds(mobj_t *source)
 {
 	
 	if (source->player)
-	{
 		return (source->player->localskin) ? source->player->localskin - 1 : source->player->skin;
-	}
 
 	if (!source->skin)
 		return MAXSKINS;
@@ -8066,7 +8064,7 @@ static void K_UpdateEngineSounds(player_t *player)
 	INT32 targetsnd = 0;
 	INT32 i;
 
-	if (leveltime || player->spectator || gamestate != GS_LEVEL || player->exiting)
+	if (leveltime < 8 || player->spectator || gamestate != GS_LEVEL || player->exiting)
 	{
 		// Silence the engines, and reset sound number while we're at it.
 		player->karthud[khud_enginesnd] = 0;

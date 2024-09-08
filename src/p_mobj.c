@@ -309,7 +309,7 @@ boolean P_SetPlayerMobjState(mobj_t *mobj, statenum_t state)
 		// Player animations
 		if (st->sprite == SPR_PLAY)
 		{
-			skin_t *skin = ((skin_t *)mobj->skin);
+			skin_t *skin = ((skin_t *)(mobj->localskin) ? mobj->localskin : mobj->skin);
 			UINT16 frame = (mobj->frame & FF_FRAMEMASK)+1;
 			UINT8 numframes, spr2;
 
@@ -435,7 +435,7 @@ boolean P_SetMobjState(mobj_t *mobj, statenum_t state)
 		// Player animations
 		if (st->sprite == SPR_PLAY)
 		{
-			skin_t *skin = ((skin_t *)mobj->skin);
+			skin_t *skin = ((skin_t *)(mobj->localskin) ? mobj->localskin : mobj->skin);
 			UINT16 frame = (mobj->frame & FF_FRAMEMASK)+1;
 			UINT8 numframes, spr2;
 
@@ -11210,9 +11210,9 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 		}
 	}
 
-	if (mobj->skin) // correct inadequecies above.
+	if (mobj->skin || mobj->localskin) // correct inadequecies above.
 	{
-		mobj->sprite2 = P_GetSkinSprite2(mobj->skin, (mobj->frame & FF_FRAMEMASK), NULL);
+		mobj->sprite2 = P_GetSkinSprite2((mobj->localskin) ? mobj->localskin : mobj->skin, (mobj->frame & FF_FRAMEMASK), NULL);
 		mobj->frame &= ~FF_FRAMEMASK;
 	}
 
