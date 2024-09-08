@@ -154,11 +154,14 @@ void M_AddonsRefresh(void)
 			S_StartSound(NULL, sfx_s224);
 			message = va("%c%s\x80\nA file was loaded with %s.\nCheck the console log for more info.\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname, ((refreshdirmenu & REFRESHDIR_ERROR) ? "errors" : "warnings"));
 		}
-		else if (majormods && !prevmajormods)
+		else //if (majormods && !prevmajormods)
 		{
 			S_StartSound(NULL, sfx_s221);
+			//Go away
+			/*
 			message = va("%c%s\x80\nYou've loaded a gameplay-modifying addon.\nCheck the console log for more info.\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 			prevmajormods = majormods;
+			*/
 		}
 
 		if (message)

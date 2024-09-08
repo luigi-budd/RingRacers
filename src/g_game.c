@@ -666,7 +666,7 @@ void G_SetGameModified(boolean silent, boolean major)
 		return;
 
 	//savemoddata = false; -- there is literally no reason to do this anymore.
-	majormods = true;
+	//majormods = true;
 
 	// If in record attack recording, cancel it.
 	if (modeattacking)
