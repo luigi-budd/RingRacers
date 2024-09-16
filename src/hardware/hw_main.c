@@ -4510,7 +4510,7 @@ static void HWR_DrawSprites(void)
 				skipshadow = false;
 			}
 
-			if (spr->mobj && R_MobjHasAnySkin(spr->mobj) && spr->mobj->sprite == SPR_PLAY)
+			if (spr->mobj && (spr->mobj->skin || spr->mobj->localskin) && spr->mobj->sprite == SPR_PLAY)
 			{
 				md2_t *md2;
 				if (spr->mobj->localskin)
@@ -4695,7 +4695,6 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	}
 
 	dispoffset = thing->dispoffset;
-	skin_t *myskin = (thing->localskin) ? (skin_t *)(thing->localskin) : (skin_t *)(thing->skin);
 
 	// hitlag vibrating (todo: interp somehow?)
 	if (thing->hitlag > 0 && (thing->eflags & MFE_DAMAGEHITLAG))
@@ -4737,7 +4736,13 @@ static void HWR_ProjectSprite(mobj_t *thing)
 		if (cv_glmodels.value) //Yellow: Only MD2's dont disappear
 		{
 			if (thing->skin && thing->sprite == SPR_PLAY)
-				md2 = &md2_playermodels[( myskin - skins )];
+				if (thing->localskin)
+					if (thing->skinlocal)
+						md2 = &md2_localplayermodels[( (skin_t *)thing->skin - localskins )];
+					else
+						md2 = &md2_playermodels[( (skin_t *)thing->localskin - skins )];
+				else
+					md2 = &md2_playermodels[( (skin_t *)thing->skin - skins )];
 			else
 				md2 = &md2_models[thing->sprite];
 
@@ -4762,7 +4767,7 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	rot = thing->frame&FF_FRAMEMASK;
 
 	//Fab : 02-08-98: 'skin' override spritedef currently used for skin
-	if (R_MobjHasAnySkin(thing) && thing->sprite == SPR_PLAY)
+	if ((thing->skin || thing->localskin) && thing->sprite == SPR_PLAY)
 	{
 		sprdef = &((skin_t *)((thing->localskin) ? thing->localskin : thing->skin))->sprites[thing->sprite2];
 #ifdef ROTSPRITE
@@ -4843,8 +4848,8 @@ static void HWR_ProjectSprite(mobj_t *thing)
 			flip ^= (1<<rot);
 	}
 
-	if (R_MobjHasAnySkin(thing) && myskin->highresscale != FRACUNIT)
-		this_scale *= FIXED_TO_FLOAT(myskin->highresscale);
+	if (R_MobjHasAnySkin(thing) && ((thing->localskin) ? (skin_t *)thing->localskin : (skin_t *)thing->skin )->highresscale != FRACUNIT)
+		this_scale *= FIXED_TO_FLOAT(((thing->localskin) ? (skin_t *)thing->localskin : (skin_t *)thing->skin )->highresscale);
 
 	spr_width = spritecachedinfo[lumpoff].width;
 	spr_height = spritecachedinfo[lumpoff].height;
@@ -5087,9 +5092,10 @@ static void HWR_ProjectSprite(mobj_t *thing)
 
 	INT32 skinnum = TC_DEFAULT;
 
+
 	if (vis->mobj->skin && vis->mobj->sprite == SPR_PLAY) // This thing is a player!
 	{
-		skinnum = myskin-skins;
+		skinnum = ((vis->mobj->localskin) ? (skin_t *)vis->mobj->localskin : (skin_t *)vis->mobj->skin ) - ((vis->mobj->localskin && (vis->mobj->skinlocal)) ? localskins : skins);
 	}
 
 	// Hide not-yet-unlocked characters in replays from other people

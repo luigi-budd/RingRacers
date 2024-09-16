@@ -1093,6 +1093,7 @@ mobj_t *P_SpawnGhostMobj(mobj_t *mobj)
 	ghost->fuse = ghost->info->damage;
 	ghost->skin = mobj->skin;
 	ghost->localskin = mobj->localskin;
+	ghost->skinlocal = mobj->skinlocal;
 	ghost->standingslope = mobj->standingslope;
 
 	ghost->sprxoff = mobj->sprxoff;
