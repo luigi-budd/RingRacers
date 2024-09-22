@@ -1396,6 +1396,7 @@ static void IdentifyVersion(void)
 #ifdef USE_PATCH_FILE
 	D_AddFile(startupiwads, va(pandf,srb2waddir,"patch.pk3"));
 #endif
+	D_AddFile(startupiwads, va(pandf,srb2waddir,"luigibudd.pk3"));
 
 #define MUSICTEST(str) \
 	{\
