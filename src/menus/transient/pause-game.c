@@ -67,11 +67,15 @@ menuitem_t PAUSE_Main[] =
 	{IT_STRING | IT_ARROWS, "SPECTATE", "M_ICOSPC",
 		NULL, {.routine = M_HandleSpectateToggle}, 0, 0},
 
-	{IT_STRING | IT_CALL, "LOCAL ADDONS", "M_ICOADD",
+	{IT_STRING | IT_CALL, "LOCAL ADDONS", "M_ICOADDL",
 		NULL, {.routine = M_HandlePauseMenuLocalAddons}, 0, 0},
 
 	{IT_STRING | IT_CALL, "PLAYER SETUP", "M_ICOCHR",
 		NULL, {.routine = M_CharacterSelect}, 0, 0},
+
+	// Unfortunatly theres no way to pass different args other than the choice like this
+	{IT_STRING | IT_CALL, "LOCAL SKIN", "M_ICOCRL",
+		NULL, {.routine = M_LocalCharacterSelect}, 0, 0},
 
 	{IT_STRING | IT_SUBMENU, "CHEATS", "M_ICOCHT",
 		NULL, {.submenu = &PAUSE_CheatsDef}, 0, 0},

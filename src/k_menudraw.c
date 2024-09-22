@@ -1619,8 +1619,8 @@ static void M_DrawCharSelectCircle(setup_player_t *p, INT16 x, INT16 y)
 				n = (n + numoptions) % numoptions;
 
 				skin = setup_chargrid[p->gridx][p->gridy].skinlist[n];
-				patch = faceprefix[skin][FACE_RANK];
-				colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
+				patch = (setup_chargrid[p->gridx][p->gridy].skinlocal[n] ? localfaceprefix : faceprefix)[skin][FACE_RANK];
+				colormap = R_GetTranslationColormap(skin, (setup_chargrid[p->gridx][p->gridy].skinlocal[n] ? localskins : skins)[skin].prefcolor, GTC_MENUCACHE);
 				radius = 24<<FRACBITS;
 
 				cx -= (SHORT(patch->width) << FRACBITS) >> 1;
@@ -1821,15 +1821,15 @@ static void M_DrawCharSelectCircle(setup_player_t *p, INT16 x, INT16 y)
 }
 
 // returns false if the character couldn't be rendered
-boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap)
+boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap, boolean local)
 {
 	UINT8 spr;
 	spritedef_t *sprdef;
 	spriteframe_t *sprframe;
 	patch_t *sprpatch;
 
-	spr = P_GetSkinSprite2(&skins[skin], spr2, NULL);
-	sprdef = &skins[skin].sprites[spr];
+	spr = P_GetSkinSprite2(&(local ? localskins : skins)[skin], spr2, NULL);
+	sprdef = &(local ? localskins : skins)[skin].sprites[spr];
 
 	if (!sprdef->numframes) // No frames ??
 		return false; // Can't render!
@@ -1844,11 +1844,11 @@ boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 ro
 		addflags ^= V_FLIP; // This sprite is left/right flipped!
 	}
 
-	if (skins[skin].highresscale != FRACUNIT)
+	if ((local ? localskins : skins)[skin].highresscale != FRACUNIT)
 	{
 		V_DrawFixedPatch(x<<FRACBITS,
 					y<<FRACBITS,
-					skins[skin].highresscale,
+					(local ? localskins : skins)[skin].highresscale,
 					addflags, sprpatch, colormap);
 	}
 	else
@@ -1940,7 +1940,7 @@ static void M_DrawCharSelectSprite(UINT8 num, INT16 x, INT16 y, boolean charflip
 
 	if (p->mdepth < CSSTEP_COLORS && p->mdepth != CSSTEP_ASKCHANGES)
 	{
-		color = skins[p->skin].prefcolor;
+		color = (p->localskin ? localskins : skins)[p->skin].prefcolor;
 	}
 	else
 	{
@@ -1949,13 +1949,13 @@ static void M_DrawCharSelectSprite(UINT8 num, INT16 x, INT16 y, boolean charflip
 
 	if (color == SKINCOLOR_NONE)
 	{
-		color = skins[p->skin].prefcolor;
+		color = (p->localskin ? localskins : skins)[p->skin].prefcolor;
 	}
 
 	colormap = R_GetTranslationColormap(p->skin, color, GTC_MENUCACHE);
 
 	M_DrawCharacterSprite(x, y, p->skin, SPR2_STIN, (charflip ? 1 : 7), ((p->mdepth == CSSTEP_READY) ? setup_animcounter : 0),
-		p->mdepth == CSSTEP_ASKCHANGES ? V_TRANSLUCENT : 0, colormap);
+		p->mdepth == CSSTEP_ASKCHANGES ? V_TRANSLUCENT : 0, colormap, p->localskin);
 }
 
 static void M_DrawCharSelectPreview(UINT8 num)
@@ -2132,8 +2132,8 @@ static void M_DrawCharSelectPreview(UINT8 num)
 					&& setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum] < numskins)
 				{
 					V_DrawThinString(x-3, y+12, 0,
-						skins[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].name);
-					randomskin = (skins[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].flags & SF_IRONMAN);
+						(setup_chargrid[p->gridx][p->gridy].skinlocal[p->clonenum] ? localskins : skins)[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].name);
+					randomskin = ((setup_chargrid[p->gridx][p->gridy].skinlocal[p->clonenum] ? localskins : skins)[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].flags & SF_IRONMAN);
 				}
 				else
 				{
@@ -2380,7 +2380,7 @@ void M_DrawProfileCard(INT32 x, INT32 y, boolean greyedout, profile_t *p)
 		{
 			UINT8 *ccolormap = R_GetTranslationColormap(skinnum, truecol, GTC_MENUCACHE);
 
-			if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap))
+			if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap, false))
 				V_DrawMappedPatch(x+14, y+66, 0, faceprefix[skinnum][FACE_RANK], ccolormap);
 		}
 
@@ -2407,7 +2407,7 @@ void M_DrawProfileCard(INT32 x, INT32 y, boolean greyedout, profile_t *p)
 		else
 			ccolormap = R_GetTranslationColormap(TC_BLINK, truecol, GTC_MENUCACHE);
 
-		if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap))
+		if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap, false))
 		{
 			V_DrawMappedPatch(x+14, y+66, 0, faceprefix[skinnum][FACE_RANK], ccolormap);
 		}
@@ -2455,6 +2455,7 @@ void M_DrawCharacterSelect(void)
 	UINT8 priority = 0;
 	INT16 quadx, quady;
 	INT16 skin;
+	boolean localskin = false;
 	INT32 basex = optionsmenu.profile ? (64 + M_EaseWithTransition(Easing_InSine, 5 * 48)) : 0;
 	boolean forceskin = M_CharacterSelectForceInAction();
 
@@ -2507,7 +2508,8 @@ void M_DrawCharacterSelect(void)
 	}
 
 	// Draw this inbetween. These drop shadows should be covered by the stat graph, but the icons shouldn't.
-	V_DrawScaledPatch(basex+ 3, 2, 0, W_CachePatchName((optionsmenu.profile ? "PR_STGRPH" : "STATGRPH"), PU_CACHE));
+	// Make the stat graph blue for localskins so you know which one youre choosing
+	V_DrawScaledPatch(basex+ 3, 2, 0, W_CachePatchName((optionsmenu.profile ? "PR_STGRPH" : (PLAY_CharSelectDef.extra2 == 1 ? "STTGRPH2" : "STATGRPH")), PU_CACHE));
 
 	// Draw the icons now
 	for (i = 0; i < 9; i++)
@@ -2527,6 +2529,7 @@ void M_DrawCharacterSelect(void)
 			{
 				skin = setup_chargrid[i][j].skinlist[setup_page];
 			}
+			localskin = setup_chargrid[i][j].skinlocal[setup_page];
 
 			for (k = 0; k < setup_numplayers; k++)
 			{
@@ -2547,9 +2550,9 @@ void M_DrawCharacterSelect(void)
 				if (k == setup_numplayers)
 					colormap = R_GetTranslationColormap(TC_RAINBOW, SKINCOLOR_GREY, GTC_MENUCACHE);
 				else
-					colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
+					colormap = R_GetTranslationColormap(skin, (localskin ? localskins : skins)[skin].prefcolor, GTC_MENUCACHE);
 
-				V_DrawMappedPatch(basex + 82 + (i*16) + quadx, 22 + (j*16) + quady, 0, faceprefix[skin][FACE_RANK], colormap);
+				V_DrawMappedPatch(basex + 82 + (i*16) + quadx, 22 + (j*16) + quady, 0, (localskin ? localfaceprefix : faceprefix)[skin][FACE_RANK], colormap);
 
 				// draw dot if there are more alts behind there!
 				if (forceskin == false && setup_page+1 < setup_chargrid[i][j].numskins)
@@ -6946,7 +6949,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			if (skin != -1)
 			{
 				colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
-				M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap);
+				M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap, false);
 
 				for (i = 0; i < skin; i++)
 				{
@@ -6974,7 +6977,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			if (skin == -1)
 				skin = 0;
 			colormap = R_GetTranslationColormap(TC_BLINK, SKINCOLOR_BLACK, GTC_MENUCACHE);
-			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap);
+			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap, false);
 
 			// Draw follower next to them
 			if (fskin != -1)
@@ -7004,7 +7007,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			colormap = R_GetTranslationColormap(skin, colorid, GTC_MENUCACHE);
 
 			// Draw reference for character bathed in coloured slime
-			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap);
+			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, 0, colormap, false);
 			break;
 		}
 		case SECRET_CUP:
@@ -8739,7 +8742,8 @@ static void M_DrawWrongPlayer(UINT8 i)
 		wrongpl.spinout ? SPR2_SPIN : SPR2_SLWN,
 		wrongpl.spinout ? ((wrongpl.across/8) & 7) : 6,
 		(wrongwarp.ticker+i),
-		0, colormap
+		0, colormap,
+		false
 	);
 #undef wrongpl
 }

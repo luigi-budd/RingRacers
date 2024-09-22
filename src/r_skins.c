@@ -1140,7 +1140,7 @@ next_token:
 
 		// Add sprites
 		R_LoadSkinSprites(wadnum, &lump, &lastlump, skin);
-		//ST_LoadFaceGraphics(numskins); -- nah let's do this elsewhere
+		ST_ReloadSkinFaceGraphics();
 
 		R_FlushTranslationColormapCache();
 
@@ -1342,7 +1342,7 @@ next_token:
 
 		// Patch sprites
 		R_LoadSkinSprites(wadnum, &lump, &lastlump, skin);
-		//ST_LoadFaceGraphics(skinnum); -- nah let's do this elsewhere
+		ST_ReloadSkinFaceGraphics();
 
 		R_FlushTranslationColormapCache();
 

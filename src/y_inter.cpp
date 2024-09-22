@@ -590,7 +590,8 @@ void Y_PlayerStandingsDrawer(y_data_t *standings, INT32 xoffset)
 					(datarightofcolumn ? 1 : 7),
 					0,
 					0,
-					charcolormap
+					charcolormap,
+					false
 				);
 
 				duelx += 8;

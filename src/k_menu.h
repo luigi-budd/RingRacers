@@ -577,6 +577,7 @@ typedef enum
 	mpause_spectatetoggle,
 	mpause_localaddons,
 	mpause_psetup,
+	mpause_localskin,
 	mpause_cheats,
 	mpause_options,
 
@@ -783,6 +784,7 @@ UINT16 M_GetColorAfter(setup_player_colors_t *colors, UINT16 value, INT32 amount
 
 extern struct setup_chargrid_s {
 	INT16 skinlist[MAXCLONES];
+	boolean skinlocal[MAXCLONES];
 	UINT8 numskins;
 } setup_chargrid[9][9];
 
@@ -816,6 +818,7 @@ struct setup_player_t
 	UINT8 profilen;
 	menu_anim_t profilen_slide;
 	INT16 skin;
+	boolean localskin;
 	SINT8 clonenum;
 	SINT8 rotate;
 	UINT8 delay;
@@ -878,6 +881,9 @@ boolean M_CharacterSelectForceInAction(void);
 boolean M_CharacterSelectHandler(INT32 choice);
 void M_CharacterSelectTick(void);
 boolean M_CharacterSelectQuit(void);
+
+//Dupe
+void M_LocalCharacterSelect(INT32 choice);
 
 void M_SetupPlayMenu(INT32 choice);
 void M_SetupGametypeMenu(INT32 choice);
@@ -1335,7 +1341,7 @@ void M_DrawMessageMenu(void);
 void M_DrawImageDef(void);
 
 void M_DrawCharacterSelect(void);
-boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap);
+boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap, boolean local);
 
 void M_DrawCup(cupheader_t *cup, fixed_t x, fixed_t y, INT32 lockedTic, boolean isTrophy, UINT8 placement);
 void M_DrawCupSelect(void);
