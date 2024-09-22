@@ -9337,6 +9337,10 @@ UINT16 P_PartialAddWadFile(const char *wadfilename, boolean local)
 	wadfiles[wadnum]->localfile = local;
 	wadnum = (UINT16)(numwadfiles-1);
 
+	// Local addons should never be marked important, as we dont want them in our demos
+	if (local)
+		wadfiles[wadnum]->important = false;
+
 	// Init partadd.
 	if (wadfiles[wadnum]->important)
 	{

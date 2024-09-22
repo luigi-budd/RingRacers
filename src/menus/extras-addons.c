@@ -137,8 +137,6 @@ void M_LocalAddons(INT32 choice)
 
 	MISC_LocalAddonsDef.prevMenu = currentMenu;
 	M_SetupNextMenu(&MISC_LocalAddonsDef, false);
-
-	CONS_Printf("M_LocalAddons()...\n");
 }
 
 char *M_AddonsHeaderPath(void)
