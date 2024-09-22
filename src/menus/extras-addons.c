@@ -156,9 +156,9 @@ void M_AddonsRefresh(void)
 		}
 		else //if (majormods && !prevmajormods)
 		{
-			S_StartSound(NULL, sfx_s221);
 			//Go away
 			/*
+			S_StartSound(NULL, sfx_s221);
 			message = va("%c%s\x80\nYou've loaded a gameplay-modifying addon.\nCheck the console log for more info.\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 			prevmajormods = majormods;
 			*/
