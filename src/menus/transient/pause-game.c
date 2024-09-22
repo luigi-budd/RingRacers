@@ -67,6 +67,9 @@ menuitem_t PAUSE_Main[] =
 	{IT_STRING | IT_ARROWS, "SPECTATE", "M_ICOSPC",
 		NULL, {.routine = M_HandleSpectateToggle}, 0, 0},
 
+	{IT_STRING | IT_CALL, "LOCAL ADDONS", "M_ICOADD",
+		NULL, {.routine = M_HandlePauseMenuLocalAddons}, 0, 0},
+
 	{IT_STRING | IT_CALL, "PLAYER SETUP", "M_ICOCHR",
 		NULL, {.routine = M_CharacterSelect}, 0, 0},
 
@@ -332,6 +335,15 @@ void M_HandlePauseMenuAddons(INT32 choice)
 	}
 
 	menuaddonoptions = menuaddonoptions ? 0 : 1;
+	S_StartSound(NULL, sfx_s3k5b);
+}
+
+void M_HandlePauseMenuLocalAddons(INT32 choice)
+{
+	(void)choice;
+	
+	M_LocalAddons(0);
+
 	S_StartSound(NULL, sfx_s3k5b);
 }
 

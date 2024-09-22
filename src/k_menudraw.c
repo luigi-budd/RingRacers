@@ -483,12 +483,14 @@ void M_DrawMenuForeground(void)
 		M_DrawMenuParty();
 	}
 
-	// draw non-green resolution border
-	if ((!menuactive || currentMenu != &PAUSE_PlaybackMenuDef) && // this obscures replay menu and I want to put in minimal effort to fix that
-		((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
-	{
-		V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
-	}
+#if 1
+		// draw non-green resolution border
+		if ((!menuactive || currentMenu != &PAUSE_PlaybackMenuDef) && // this obscures replay menu and I want to put in minimal effort to fix that
+			((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
+		{
+			V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
+		}
+#endif
 }
 
 //

@@ -125,6 +125,7 @@ void M_PrevMenuGametype(UINT32 forbidden);
 void M_HandleHostMenuGametype(INT32 choice);
 void M_HandlePauseMenuGametype(INT32 choice);
 void M_HandlePauseMenuAddons(INT32 choice);
+void M_HandlePauseMenuLocalAddons(INT32 choice);
 
 extern UINT32 menucallvote; // not midVoteType_e to prevent #include k_zvote
 extern UINT32 menuaddonoptions;
@@ -574,6 +575,7 @@ typedef enum
 
 	mpause_continue,
 	mpause_spectatetoggle,
+	mpause_localaddons,
 	mpause_psetup,
 	mpause_cheats,
 	mpause_options,
@@ -1290,8 +1292,11 @@ void M_PlaybackQuit(INT32 choice);
 // Misc menus:
 #define numaddonsshown 4
 void M_Addons(INT32 choice);
+void M_LocalAddons(INT32 choice);
 void M_AddonsRefresh(void);
 void M_HandleAddons(INT32 choice);
+//This sucks
+void M_HandleLocalAddons(INT32 choice);
 char *M_AddonsHeaderPath(void);
 extern consvar_t cv_dummyaddonsearch;
 extern consvar_t cv_dummyextraspassword;
