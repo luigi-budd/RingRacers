@@ -67,7 +67,7 @@ menuitem_t PAUSE_Main[] =
 	{IT_STRING | IT_ARROWS, "SPECTATE", "M_ICOSPC",
 		NULL, {.routine = M_HandleSpectateToggle}, 0, 0},
 
-	{IT_STRING | IT_CALL, "LOCAL ADDONS", "M_ICOADDL",
+	{IT_STRING | IT_CALL, "LOCAL ADDONS", "M_ICOLAD",
 		NULL, {.routine = M_HandlePauseMenuLocalAddons}, 0, 0},
 
 	{IT_STRING | IT_CALL, "PLAYER SETUP", "M_ICOCHR",
