@@ -483,12 +483,14 @@ void M_DrawMenuForeground(void)
 		M_DrawMenuParty();
 	}
 
+#if 0
 	// draw non-green resolution border
 	if ((!menuactive || currentMenu != &PAUSE_PlaybackMenuDef) && // this obscures replay menu and I want to put in minimal effort to fix that
 		((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
 	{
 		V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
 	}
+#endif
 }
 
 //
@@ -938,7 +940,7 @@ static void M_DrawPausedText(INT32 x)
 	patch_t *pausebg = W_CachePatchName("M_STRIPU", PU_CACHE);
 	patch_t *pausetext = W_CachePatchName("M_PAUSET", PU_CACHE);
 
-	INT32 snapFlags = menuactive ? 0 : (V_SNAPTOLEFT|V_SNAPTOTOP);
+	INT32 snapFlags = (V_SNAPTOLEFT|V_SNAPTOTOP); //menuactive ? 0 : (V_SNAPTOLEFT|V_SNAPTOTOP);
 
 	V_DrawFixedPatch(x, -5*FRACUNIT, FRACUNIT, snapFlags|V_ADD, pausebg,   NULL);
 	V_DrawFixedPatch(x, -5*FRACUNIT, FRACUNIT, snapFlags,       pausetext, NULL);
@@ -5748,12 +5750,12 @@ void M_DrawPause(void)
 	//V_DrawFadeScreen(0xFF00, 16);
 
 	{
-		INT32 x = Easing_OutQuad(mt, -BASEVIDWIDTH, 0);
+		INT32 x = Easing_OutQuad(mt, -vid.width, 0);
 		INT32 y = 56;
 
 		if (g_realsongcredit && !S_MusicDisabled())
 		{
-			V_DrawThinString(x + 2, y, 0, g_realsongcredit);
+			V_DrawThinString(x + 2, y, V_SNAPTOLEFT, g_realsongcredit);
 		}
 
 		if (gamestate == GS_LEVEL)
@@ -5779,7 +5781,7 @@ void M_DrawPause(void)
 
 			y += 11;
 
-			V_DrawFill(x + 1, y + 8, width + 20, 3, 31);
+			V_DrawFill(x + 1, y + 8, width + 20, 3, 31|V_SNAPTOLEFT);
 
 			V_DrawStringScaled(
 				(x + 19) * FRACUNIT,
@@ -5787,7 +5789,7 @@ void M_DrawPause(void)
 				FRACUNIT,
 				FRACUNIT,
 				FRACUNIT,
-				V_AQUAMAP,
+				V_AQUAMAP|V_SNAPTOLEFT,
 				NULL,
 				MED_FONT,
 				name
@@ -5797,7 +5799,7 @@ void M_DrawPause(void)
 				(x + 1) * FRACUNIT,
 				(y - 1) * FRACUNIT,
 				16 * FRACUNIT,
-				0,
+				V_SNAPTOLEFT,
 				gamemap - 1,
 				NULL
 			);
@@ -5813,7 +5815,7 @@ void M_DrawPause(void)
 	}
 
 	// Vertical Strip:
-	V_DrawFixedPatch((230 + offset)<<FRACBITS, 0, FRACUNIT, V_ADD, vertbg, NULL);
+	V_DrawFixedPatch((230 + offset)<<FRACBITS, 0, FRACUNIT, V_ADD|V_SNAPTORIGHT, vertbg, NULL);
 
 	// Okay that's cool but which icon do we draw first? let's roll back from itemOn!
 	// At most we'll draw 7 items, 1 in the center, 3 above, 3 below.
@@ -5837,11 +5839,11 @@ void M_DrawPause(void)
 	// Reminder that we set the patches of the options to the description since we're not using that. I'm smart, I know...
 
 	// Draw the background arrow
-	V_DrawFixedPatch(arrxpos<<FRACBITS, 100<<FRACBITS, FRACUNIT, 0, arrstart, NULL);
+	V_DrawFixedPatch(arrxpos<<FRACBITS, 100<<FRACBITS, FRACUNIT, V_SNAPTORIGHT, arrstart, NULL);
 
-	while ((arrxpos - arrfill->width) < BASEVIDWIDTH)
+	while ((arrxpos - arrfill->width) < vid.width)
 	{
-		V_DrawFixedPatch(arrxpos<<FRACBITS, 100<<FRACBITS, FRACUNIT, 0, arrfill, NULL);
+		V_DrawFixedPatch(arrxpos<<FRACBITS, 100<<FRACBITS, FRACUNIT, V_SNAPTORIGHT, arrfill, NULL);
 		arrxpos += arrfill->width;
 	}
 
@@ -5887,7 +5889,7 @@ void M_DrawPause(void)
 
 				INT32 yofs = Easing_InQuad(t, pausemenu.offset.dist, 0);
 				dypos = ypos + yofs;
-				V_DrawFixedPatch( ((i == itemOn ? (294 - yofs*2/3 * (dypos > 100 ? 1 : -1)) : 261) + offset) << FRACBITS, (dypos)*FRACUNIT, FRACUNIT, 0, pp, colormap);
+				V_DrawFixedPatch( ((i == itemOn ? (294 - yofs*2/3 * (dypos > 100 ? 1 : -1)) : 261) + offset) << FRACBITS, (dypos)*FRACUNIT, FRACUNIT, V_SNAPTORIGHT, pp, colormap);
 
 				ypos += 50;
 				itemsdrawn++;	// We drew that!
@@ -5992,7 +5994,7 @@ void M_DrawPause(void)
 	if (selectableheadertext != NULL)
 	{
 		// For selections, show the full menu text on top.
-		V_DrawCenteredLSTitleHighString(220 + offset*2, 75, selectableflags, selectableheadertext);
+		V_DrawCenteredLSTitleHighString(220 + offset*2, 75, selectableflags|V_SNAPTORIGHT, selectableheadertext);
 	}
 
 	if (selectabletext != NULL)
@@ -6001,10 +6003,10 @@ void M_DrawPause(void)
 		selectableflags |= V_YELLOWMAP;
 
 		INT32 w = V_LSTitleLowStringWidth(selectabletext, selectableflags)/2;
-		V_DrawLSTitleLowString(220-w + offset*2, 103, selectableflags, selectabletext);
+		V_DrawLSTitleLowString(220-w + offset*2, 103, selectableflags|V_SNAPTORIGHT, selectabletext);
 
-		V_DrawMenuString(220-w + offset*2 - 8 - (skullAnimCounter/5), 103+6, selectableflags, "\x1C"); // left arrow
-		V_DrawMenuString(220+w + offset*2 + (skullAnimCounter/5), 103+6, selectableflags, "\x1D"); // right arrow
+		V_DrawMenuString(220-w + offset*2 - 8 - (skullAnimCounter/5), 103+6, selectableflags|V_SNAPTORIGHT, "\x1C"); // left arrow
+		V_DrawMenuString(220+w + offset*2 + (skullAnimCounter/5), 103+6, selectableflags|V_SNAPTORIGHT, "\x1D"); // right arrow
 	}
 
 	if (maintext != NULL)
@@ -6045,10 +6047,10 @@ void M_DrawPause(void)
 
 		// If there's no 2nd word, take this opportunity to center this line of text.
 		if (word1len)
-			V_DrawCenteredLSTitleHighString(220 + offset*2, 75 + (!word2len ? 10 : 0), mainflags, word1);
+			V_DrawCenteredLSTitleHighString(220 + offset*2, 75 + (!word2len ? 10 : 0), mainflags|V_SNAPTORIGHT, word1);
 
 		if (word2len)
-			V_DrawCenteredLSTitleLowString(220 + offset*2, 103, mainflags, word2);
+			V_DrawCenteredLSTitleLowString(220 + offset*2, 103, mainflags|V_SNAPTORIGHT, word2);
 	}
 
 	if (gamestate != GS_INTERMISSION && roundqueue.size > 0)
@@ -6083,19 +6085,19 @@ void M_DrawPause(void)
 			{
 				V_DrawMappedPatch(
 					24, 145 + offset/2,
-					0,
+					V_SNAPTOLEFT,
 					smallroundpatch,
 					NULL);
 			}
 		}
 
-		V_DrawCenteredMenuString(24, 167 + offset/2, V_YELLOWMAP, M_GetGameplayMode());
+		V_DrawCenteredMenuString(24, 167 + offset/2, V_YELLOWMAP|V_SNAPTOLEFT, M_GetGameplayMode());
 
 		Y_RoundQueueDrawer(&standings, offset/2, false, false);
 	}
 	else
 	{
-		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP, M_GetGameplayMode());
+		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP|V_SNAPTOLEFT, M_GetGameplayMode());
 	}
 }
 
