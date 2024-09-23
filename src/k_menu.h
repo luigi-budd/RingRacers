@@ -1321,8 +1321,8 @@ void M_HandleImageDef(INT32 choice);
 
 #define M_ALTCOLOR V_ORANGEMAP
 
-void M_DrawCursorHand(INT32 x, INT32 y);
-void M_DrawUnderline(INT32 left, INT32 right, INT32 y);
+void M_DrawCursorHand(INT32 x, INT32 y, INT32 flags);
+void M_DrawUnderline(INT32 left, INT32 right, INT32 y, INT32 flags);
 
 // For some menu highlights
 UINT16 M_GetCvPlayerColor(UINT8 pnum);
@@ -1341,7 +1341,7 @@ void M_DrawMessageMenu(void);
 void M_DrawImageDef(void);
 
 void M_DrawCharacterSelect(void);
-boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap, boolean local);
+boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap);
 
 void M_DrawCup(cupheader_t *cup, fixed_t x, fixed_t y, INT32 lockedTic, boolean isTrophy, UINT8 placement);
 void M_DrawCupSelect(void);
@@ -1498,7 +1498,7 @@ void M_Statistics(INT32 choice);
 void M_DrawStatistics(void);
 boolean M_StatisticsInputs(INT32 ch);
 
-void M_DrawCharacterIconAndEngine(INT32 x, INT32 y, UINT8 skin, UINT8 *colormap, UINT8 baseskin);
+void M_DrawCharacterIconAndEngine(INT32 x, INT32 y, UINT8 skin, UINT8 *colormap, UINT8 baseskin, INT32 flags);
 fixed_t M_DrawCupWinData(INT32 rankx, INT32 ranky, cupheader_t *cup, UINT8 difficulty, boolean flash, boolean statsmode);
 
 #define MAXWRONGPLAYER MAXSPLITSCREENPLAYERS

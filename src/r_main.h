@@ -126,6 +126,7 @@ extern struct RenderStats g_renderstats;
 //
 
 extern consvar_t cv_showhud;
+extern consvar_t cv_flipcam;
 extern consvar_t cv_homremoval;
 extern consvar_t cv_chasecam[MAXSPLITSCREENPLAYERS];
 
