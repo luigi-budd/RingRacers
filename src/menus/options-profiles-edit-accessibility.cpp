@@ -49,8 +49,8 @@ void draw_routine()
 
 			if (selected)
 			{
-				M_DrawUnderline(h.x(), BASEVIDWIDTH - 18, h.y());
-				M_DrawCursorHand(h.x(), h.y());
+				M_DrawUnderline(h.x(), BASEVIDWIDTH - 18, h.y(), 0);
+				M_DrawCursorHand(h.x(), h.y(), 0);
 			}
 
 			if ((it.status & IT_HEADERTEXT) == IT_HEADERTEXT)
