@@ -125,6 +125,7 @@ void M_PrevMenuGametype(UINT32 forbidden);
 void M_HandleHostMenuGametype(INT32 choice);
 void M_HandlePauseMenuGametype(INT32 choice);
 void M_HandlePauseMenuAddons(INT32 choice);
+void M_HandlePauseMenuLocalAddons(INT32 choice);
 
 extern UINT32 menucallvote; // not midVoteType_e to prevent #include k_zvote
 extern UINT32 menuaddonoptions;
@@ -574,7 +575,9 @@ typedef enum
 
 	mpause_continue,
 	mpause_spectatetoggle,
+	mpause_localaddons,
 	mpause_psetup,
+	mpause_localskin,
 	mpause_cheats,
 	mpause_options,
 
@@ -781,6 +784,7 @@ UINT16 M_GetColorAfter(setup_player_colors_t *colors, UINT16 value, INT32 amount
 
 extern struct setup_chargrid_s {
 	INT16 skinlist[MAXCLONES];
+	boolean skinlocal[MAXCLONES];
 	UINT8 numskins;
 } setup_chargrid[9][9];
 
@@ -814,6 +818,7 @@ struct setup_player_t
 	UINT8 profilen;
 	menu_anim_t profilen_slide;
 	INT16 skin;
+	boolean localskin;
 	SINT8 clonenum;
 	SINT8 rotate;
 	UINT8 delay;
@@ -876,6 +881,9 @@ boolean M_CharacterSelectForceInAction(void);
 boolean M_CharacterSelectHandler(INT32 choice);
 void M_CharacterSelectTick(void);
 boolean M_CharacterSelectQuit(void);
+
+//Dupe
+void M_LocalCharacterSelect(INT32 choice);
 
 void M_SetupPlayMenu(INT32 choice);
 void M_SetupGametypeMenu(INT32 choice);
@@ -1290,8 +1298,11 @@ void M_PlaybackQuit(INT32 choice);
 // Misc menus:
 #define numaddonsshown 4
 void M_Addons(INT32 choice);
+void M_LocalAddons(INT32 choice);
 void M_AddonsRefresh(void);
 void M_HandleAddons(INT32 choice);
+//This sucks
+void M_HandleLocalAddons(INT32 choice);
 char *M_AddonsHeaderPath(void);
 extern consvar_t cv_dummyaddonsearch;
 extern consvar_t cv_dummyextraspassword;

@@ -8935,7 +8935,7 @@ boolean P_RunSOC(const char *socfilename)
 	lumpnum_t lump;
 
 	if (strstr(socfilename, ".soc") != NULL)
-		return P_AddWadFile(socfilename);
+		return P_AddWadFile(socfilename,false);
 
 	lump = W_CheckNumForName(socfilename);
 	if (lump == LUMPERROR)
@@ -9276,11 +9276,11 @@ UINT8 P_InitMapData(void)
 // Add a wadfile to the active wad files,
 // replace sounds, musics, patches, textures, sprites and maps
 //
-boolean P_AddWadFile(const char *wadfilename)
+boolean P_AddWadFile(const char *wadfilename, boolean local)
 {
 	UINT16 wadnum;
 
-	if ((wadnum = P_PartialAddWadFile(wadfilename)) == UINT16_MAX)
+	if ((wadnum = P_PartialAddWadFile(wadfilename, local)) == UINT16_MAX)
 		return false;
 
 	if (P_PartialAddGetStage() >= 0)
@@ -9289,11 +9289,25 @@ boolean P_AddWadFile(const char *wadfilename)
 	return true;
 }
 
+boolean P_AddWadFileLocal(const char *wadfilename)
+{
+	UINT16 wadnum;
+
+	if ((wadnum = P_PartialAddWadFile(wadfilename, true)) == UINT16_MAX)
+		return false;
+
+	if (P_PartialAddGetStage() >= 0)
+		P_MultiSetupWadFiles(true);
+
+ 	return true;
+}
+
+
 //
 // Add a WAD file and do the per-WAD setup stages.
 // Call P_MultiSetupWadFiles as soon as possible after any number of these.
 //
-UINT16 P_PartialAddWadFile(const char *wadfilename)
+UINT16 P_PartialAddWadFile(const char *wadfilename, boolean local)
 {
 	size_t i, j, sreplaces = 0, mreplaces = 0, digmreplaces = 0;
 	UINT16 numlumps, wadnum;
@@ -9320,7 +9334,12 @@ UINT16 P_PartialAddWadFile(const char *wadfilename)
 		return false;
 	}
 
+	wadfiles[wadnum]->localfile = local;
 	wadnum = (UINT16)(numwadfiles-1);
+
+	// Local addons should never be marked important, as we dont want them in our demos
+	if (local)
+		wadfiles[wadnum]->important = false;
 
 	// Init partadd.
 	if (wadfiles[wadnum]->important)
@@ -9435,7 +9454,7 @@ UINT16 P_PartialAddWadFile(const char *wadfilename)
 	//
 	// look for skins
 	//
-	R_AddSkins(wadnum, false); // faB: wadfile index in wadfiles[]
+	R_AddSkins(wadnum, false, local); // faB: wadfile index in wadfiles[]
 	R_PatchSkins(wadnum, false); // toast: PATCH PATCH
 
 	//
