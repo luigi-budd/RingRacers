@@ -511,12 +511,6 @@ static void Y_DrawVoteThumbnail(fixed_t center_x, fixed_t center_y, fixed_t widt
 			UINT8 *playerMap = R_GetTranslationColormap(players[playerID].skin, players[playerID].skincolor, GTC_CACHE);
 			patch_t *playerPatch = faceprefix[players[playerID].skin][FACE_RANK];
 
-			if (players[playerID].localskin)
-			{
-				playerMap = R_GetTranslationColormap(players[playerID].localskin - 1, players[playerID].skincolor, GTC_CACHE);
-				playerPatch = ((players[playerID].skinlocal) ? localfaceprefix : faceprefix)[players[playerID].localskin - 1][FACE_RANK];
-			}
-
 			V_DrawFixedPatch(
 				(fx + fw - whiteSq + dupx) * FRACUNIT,
 				(fy + fh - whiteSq + dupy) * FRACUNIT,
