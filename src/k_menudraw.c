@@ -2511,7 +2511,6 @@ void M_DrawCharacterSelect(void)
 	// Make the stat graph blue for localskins so you know which one youre choosing
 	V_DrawScaledPatch(basex+ 3, 2, 0, W_CachePatchName((optionsmenu.profile ? "PR_STGRPH" : (PLAY_CharSelectDef.extra2 == 1 ? "STTGRPH2" : "STATGRPH")), PU_CACHE));
 
-
 	// Draw the icons now
 	for (i = 0; i < 9; i++)
 	{

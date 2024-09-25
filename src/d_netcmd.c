@@ -74,6 +74,8 @@
 #include "k_director.h"
 #include "k_credits.h"
 
+#include "fastcmp.h"
+
 #ifdef SRB2_CONFIG_ENABLE_WEBM_MOVIES
 #include "m_avrecorder.h"
 #endif
@@ -132,6 +134,10 @@ static void Command_CancelInvite_f(void);
 static void Command_AcceptInvite_f(void);
 static void Command_RejectInvite_f(void);
 static void Command_LeaveParty_f(void);
+
+static void Command_Addfilelocal(void);
+static void Command_Addskins(void);
+static void Command_GLocalSkin(void);
 
 static void Command_Addfile(void);
 static void Command_ListWADS_f(void);
@@ -243,6 +249,7 @@ CV_PossibleValue_t perfstats_cons_t[] = {
 	{PS_THINKFRAME, "ThinkFrame"},
 	{0, NULL}
 };
+
 
 char timedemo_name[256];
 boolean timedemo_csv;
@@ -402,6 +409,10 @@ void D_RegisterServerCommands(void)
 	COM_AddCommand("exitlevel", Command_ExitLevel_f);
 	COM_AddDebugCommand("showmap", Command_Showmap_f);
 	COM_AddCommand("mapmd5", Command_Mapmd5_f);
+
+	COM_AddCommand("addfilelocal", Command_Addfilelocal);
+	COM_AddCommand("addskins", Command_Addskins);
+	COM_AddCommand("localskin", Command_GLocalSkin);
 
 	COM_AddCommand("addfile", Command_Addfile);
 	COM_AddDebugCommand("listwad", Command_ListWADS_f);
@@ -4417,6 +4428,30 @@ static void Got_RunSOCcmd(const UINT8 **cp, INT32 playernum)
 	G_SetGameModified(true, false);
 }
 
+static void Command_Addfilelocal(void)
+{
+	const char *fn;
+	INT32 i;
+
+	if (COM_Argc() != 2)
+	{
+		CONS_Printf(M_GetText("addfilelocal <wadfile.wad>: load wad file\n"));
+		return;
+	}
+	else
+		fn = COM_Argv(1);
+
+	// Disallow non-printing characters and semicolons.
+	for (i = 0; fn[i] != '\0'; i++)
+		if (!isprint(fn[i]) || fn[i] == ';')
+			return;
+
+	// Add any wad file, ignoring checks for if it contains complex things like
+	// lua. Great for complex but client-side customizations, like different
+	// level cards or anything like that.
+	P_AddWadFileLocal(fn);
+}
+
 /** Adds a pwad at runtime.
   * Searches for sounds, maps, music, new images.
   */
@@ -4496,7 +4531,7 @@ static void Command_Addfile(void)
 		// Add file on your client directly if it is trivial, or you aren't in a netgame.
 		if (!(netgame || multiplayer) || musiconly)
 		{
-			P_AddWadFile(fn);
+			P_AddWadFile(fn,false);
 			addedfiles[numfilesadded++] = fn;
 			continue;
 		}
@@ -4538,7 +4573,6 @@ static void Command_Addfile(void)
 			else // file not found
 				continue;
 
-			/*
 			for (i = 0; i < numwadfiles; i++)
 			{
 				if (!memcmp(wadfiles[i]->md5sum, md5sum, 16))
@@ -4548,7 +4582,7 @@ static void Command_Addfile(void)
 					break;
 				}
 			}
-			*/
+
 			if (valid == false)
 			{
 				continue;
@@ -4568,6 +4602,146 @@ static void Command_Addfile(void)
 	Z_Free(addedfiles);
 #endif/*TESTERS*/
 }
+
+/** Adds something at runtime.
+  */
+static void
+Command_Addskins (void)
+{
+	if (COM_Argc() > 3)
+	{
+		CONS_Printf(
+				"addskins <file>: Load a skin file.\n");
+		return;
+	}
+	// no forcing?
+	/*
+	if (fasticmp(COM_Argv(2), "-force") || fasticmp(COM_Argv(2), "-f")) {
+		CONS_Alert(CONS_NOTICE, M_GetText("Adding file %s. May or may not be a skin.\n"), COM_Argv(1));
+		P_AddWadFile(COM_Argv(1), 0, true);	
+	} else {
+		if (DumbStartsWith("KC_", COM_Argv(1))) {
+			P_AddWadFile(COM_Argv(1), 0, true);
+		} else if (DumbStartsWith("KCL_", COM_Argv(1))) {
+			if (!demo.playback) {
+				CONS_Alert(CONS_ERROR, M_GetText("Cannot add file %s as it is a skin with lua. Include -force or -f to force it to load.\n"), COM_Argv(1));
+				return;
+			} else {
+	*/
+				P_AddWadFile(COM_Argv(1), true);
+	/*
+			}
+		} else {
+			CONS_Alert(CONS_ERROR, M_GetText("Cannot add file %s as it is not a skin.\n"), COM_Argv(1));
+			return;
+		}
+	}
+	*/
+}
+
+static void Command_GLocalSkin (void)
+{
+	size_t first_option;
+	size_t option_display;
+	size_t option_all;
+	size_t option_player;
+
+	option_player	= COM_CheckPartialParm("-p");
+	option_display 	= COM_CheckPartialParm("-d");
+	option_all		= COM_CheckPartialParm("-a");
+
+	char* fuck; // local skin name
+
+	if (!( first_option = COM_FirstOption() ))
+		first_option = COM_Argc();
+
+	if (first_option < 2)
+	{
+		/* holy fucking shit */
+		CONS_Printf("localskin <name> [-player <name>] [-display <number>] [-all]:\n");
+		CONS_Printf(M_GetText("Set a localskin via its internal name (usually printed on the console).\n\n\
+* Using \"-player\" will set a localskin to a specified player.\n\
+  Defaults to yourself.\n\
+* Using \"-display\" will set a localskin to the displayed player.\n\
+  Defaults to 0, which is the first player displayed.\n\
+  Can go up to 3 for splitscreen.\n\
+* Using \"-all\" will set a localskin to ALL players.\n\
+* \"localskin none\" removes the localskin, just like how\n\
+  \"forceskin none\" does.\n"));
+		return;
+	}
+
+	fuck = ConcatCommandArgv(1, first_option);
+
+	const char* player_name = player_names[consoleplayer];
+	const char* display_num = "0";
+	size_t dnum = 0;
+
+	if (option_display)  // -display
+	{
+		// handle default: 0
+		if (COM_Argc() >= option_display)
+			display_num = COM_Argv(option_display + 1);
+
+		dnum = atoi(display_num);
+		if (dnum > 3) // nuh uh
+			dnum = 0;
+
+		SetLocalPlayerSkin(displayplayers[dnum], fuck, NULL);
+
+		CONS_Printf("Successfully applied localskin to displayed player.\n");
+
+		Z_Free(fuck);
+		return;
+	}
+	else if (option_all) // -all
+	{
+		int i;
+
+		for (i = 0; i < MAXPLAYERS; ++i) 
+		{
+			if (!playeringame[i])
+				continue;
+			SetLocalPlayerSkin(i, fuck, NULL);
+		}
+		CONS_Printf("Successfully applied localskin to all players.\n");
+
+		Z_Free(fuck);
+		return;
+	}
+	else // -player or no other arguments
+	{
+		if (option_player)
+		{
+			int i;
+			player_name = COM_Argv(option_player + 1);
+
+			for (i = 0; i < MAXPLAYERS; ++i)
+			{
+				if (fasticmp(player_names[i], player_name))
+					SetLocalPlayerSkin(i, fuck, NULL);
+			}
+			CONS_Printf("Successfully applied localskin to specified player.\n");
+
+			Z_Free(fuck);
+			return;
+		}
+		else
+		{
+			SetLocalPlayerSkin(consoleplayer, fuck, &cv_localskin);
+			CONS_Printf("Successfully applied localskin.\n");
+
+			Z_Free(fuck);
+			return;
+		}
+
+		CONS_Printf("Could not apply localskin.\n");
+
+		Z_Free(fuck);
+		return;
+	}
+}
+
 
 static void Got_RequestAddfilecmd(const UINT8 **cp, INT32 playernum)
 {
@@ -4647,7 +4821,7 @@ static void Got_Addfilecmd(const UINT8 **cp, INT32 playernum)
 
 	ncs = findfile(filename,md5sum,true);
 
-	if (ncs != FS_FOUND || !P_AddWadFile(filename))
+	if (ncs != FS_FOUND || !P_AddWadFile(filename,false))
 	{
 		Command_ExitGame_f();
 		if (ncs == FS_FOUND)
@@ -4689,7 +4863,10 @@ static void Command_ListWADS_f(void)
 		else if (i <= mainwads)
 			CONS_Printf("\x82 * %.2d\x80: %s\n", i, tempname);
 		else if (!wadfiles[i]->important)
-			CONS_Printf("\x86 %c %.2d: %s\n", ((i <= mainwads + musicwads) ? '*' : ' '), i, tempname);
+			if (wadfiles[i]->localfile)
+				CONS_Printf("\x83   %.2d: %s\n", i, tempname);
+			else
+				CONS_Printf("\x86 %c %.2d: %s\n", ((i <= mainwads + musicwads) ? '*' : ' '), i, tempname);
 		else
 			CONS_Printf("   %.2d: %s\n", i, tempname);
 	}
