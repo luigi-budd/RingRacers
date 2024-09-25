@@ -992,9 +992,8 @@ static void R_DrawVisSprite(vissprite_t *vis)
 	frac = vis->startfrac;
 	windowtop = windowbottom = sprbotscreen = INT32_MAX;
 
-	skin_t *myskin = (vis->mobj->localskin) ? ((skin_t *)vis->mobj->localskin) : ((skin_t *)vis->mobj->skin);
-	if (!(vis->cut & SC_PRECIP) && (vis->mobj->skin || vis->mobj->localskin) && myskin->highresscale != FRACUNIT)
-		this_scale = FixedMul(this_scale, myskin->highresscale);
+	if (!(vis->cut & SC_PRECIP) && vis->mobj->skin && ((skin_t *)vis->mobj->skin)->highresscale != FRACUNIT)
+		this_scale = FixedMul(this_scale, ((skin_t *)vis->mobj->skin)->highresscale);
 
 	if (this_scale <= 0)
 		this_scale = 1;
@@ -1845,11 +1844,11 @@ static void R_ProjectSprite(mobj_t *thing)
 	frame = thing->frame&FF_FRAMEMASK;
 
 	//Fab : 02-08-98: 'skin' override spritedef currently used for skin
-	if ((thing->skin || thing->localskin) && thing->sprite == SPR_PLAY)
+	if (thing->skin && thing->sprite == SPR_PLAY)
 	{
-		sprdef = &((skin_t *)( (thing->localskin) ? thing->localskin : thing->skin ))->sprites[thing->sprite2];
+		sprdef = &((skin_t *)thing->skin)->sprites[thing->sprite2];
 #ifdef ROTSPRITE
-		sprinfo = &((skin_t *)( (thing->localskin) ? thing->localskin : thing->skin ))->sprinfo[thing->sprite2];
+		sprinfo = &((skin_t *)thing->skin)->sprinfo[thing->sprite2];
 #endif
 		if (frame >= sprdef->numframes) {
 			CONS_Alert(CONS_ERROR, M_GetText("R_ProjectSprite: invalid skins[\"%s\"].sprites[%sSPR2_%s] frame %s\n"), ((skin_t *)thing->skin)->name, ((thing->sprite2 & FF_SPR2SUPER) ? "FF_SPR2SUPER|": ""), spr2names[(thing->sprite2 & ~FF_SPR2SUPER)], sizeu5(frame));
@@ -1935,9 +1934,7 @@ static void R_ProjectSprite(mobj_t *thing)
 
 	I_Assert(lump < max_spritelumps);
 
-	if (thing->localskin && ((skin_t *)thing->localskin)->highresscale != FRACUNIT)
-		this_scale = FixedMul(this_scale, ((skin_t *)thing->localskin)->highresscale);
-	else if (thing->skin && ((skin_t *)thing->skin)->highresscale != FRACUNIT)
+	if (thing->skin && ((skin_t *)thing->skin)->highresscale != FRACUNIT)
 		this_scale = FixedMul(this_scale, ((skin_t *)thing->skin)->highresscale);
 
 	spr_width = spritecachedinfo[lump].width;

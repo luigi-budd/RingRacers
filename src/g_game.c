@@ -2129,8 +2129,6 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	UINT32 lapPoints;
 	UINT16 skincolor;
 	INT32 skin;
-	int localskin;
-	boolean skinlocal;
 	UINT8 availabilities[MAXAVAILABILITY];
 	UINT8 fakeskin;
 	UINT8 lastfakeskin;
@@ -2203,8 +2201,6 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 
 	skincolor = players[player].skincolor;
 	skin = players[player].skin;
-	localskin = players[player].localskin;
-	skinlocal = players[player].skinlocal;
 
 	if (betweenmaps)
 	{
@@ -2453,8 +2449,6 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	// save player config truth reborn
 	p->skincolor = skincolor;
 	p->skin = skin;
-	p->localskin = localskin;
-	p->skinlocal = skinlocal;
 
 	p->fakeskin = fakeskin;
 	p->kartspeed = kartspeed;

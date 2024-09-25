@@ -518,21 +518,17 @@ void level_tally_t::Init(player_t *player)
 	{
 		// It'd be neat to add all of the grade sounds,
 		// but not this close to release
-		// Adjust for localskin aswell
-		UINT8 skinid = player->skin;
-		if (player->localskin)
-			skinid = player->localskin - 1;
-		
 
-		if (skinid >= ((player->localskin && player->skinlocal) ? numlocalskins : numskins) || R_CanShowSkinInDemo(skinid) == false)
+		UINT8 skinid = player->skin;
+		if (skinid >= numskins || R_CanShowSkinInDemo(skinid) == false)
 			;
 		else if (rank < GRADE_C)
 		{
-			gradeVoice = ((player->localskin && player->skinlocal) ? localskins : skins)[skinid].soundsid[S_sfx[sfx_klose].skinsound];
+			gradeVoice = skins[skinid].soundsid[S_sfx[sfx_klose].skinsound];
 		}
 		else
 		{
-			gradeVoice = ((player->localskin && player->skinlocal) ? localskins : skins)[skinid].soundsid[S_sfx[sfx_kwin].skinsound];
+			gradeVoice = skins[skinid].soundsid[S_sfx[sfx_kwin].skinsound];
 		}
 	}
 
