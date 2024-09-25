@@ -5141,7 +5141,7 @@ static void K_drawKartStartBulbs(void)
 				{
 					bulbtic -= length;
 
-					if (cv_reducevfx.value != 0)
+					if (cv_reducevfx.value != 0 || true)
 					{
 						patchnum = chillloop_animation[0];
 					}
@@ -5152,7 +5152,7 @@ static void K_drawKartStartBulbs(void)
 				}
 				else
 				{
-					if (cv_reducevfx.value != 0)
+					if (cv_reducevfx.value != 0 || true)
 					{
 						patchnum = loop_animation[0];
 					}
