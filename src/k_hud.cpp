@@ -54,7 +54,6 @@
 #include "k_dialogue.h"
 #include "f_finale.h"
 #include "m_easing.h"
-#include "r_main.h"	// cv_flipcam
 
 //{ 	Patch Definitions
 static patch_t *kp_nodraw;
@@ -214,7 +213,6 @@ static patch_t *kp_trickcool[2];
 
 patch_t *kp_autoroulette;
 patch_t *kp_autoring;
-patch_t *kp_flipcam;
 
 patch_t *kp_capsuletarget_arrow[2][2];
 patch_t *kp_capsuletarget_icon[2];
@@ -785,7 +783,6 @@ void K_LoadKartHUDGraphics(void)
 
 	HU_UpdatePatch(&kp_autoroulette, "A11YITEM");
 	HU_UpdatePatch(&kp_autoring, "A11YRING");
-	HU_UpdatePatch(&kp_flipcam, "A11YFLPC");
 
 	sprintf(buffer, "K_BOSB0x");
 	for (i = 0; i < 8; i++)
@@ -3290,22 +3287,6 @@ static void K_drawKartAccessibilityIcons(boolean gametypeinfoshown, INT32 fx)
         else
             fx += 14 + 1;
     }
-
-	if (stplyr->mo != NULL)
-	{
-		if (cv_flipcam.value && stplyr->mo->eflags & MFE_VERTICALFLIP)
-		{
-			if (mirror)
-				fx -= 14;
-
-			V_DrawScaledPatch(fx, fy-1, V_SLIDEIN|splitflags, kp_flipcam);
-
-			if (mirror)
-				fx--;
-			else
-				fx += 14 + 1;
-		}
-	}
 }
 
 static void K_drawKartSpeedometer(boolean gametypeinfoshown)

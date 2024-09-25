@@ -839,7 +839,6 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	//
 	W_MakeFileMD5(filename, md5sum);
 
-	/*
 	for (i = 0; i < numwadfiles; i++)
 	{
 		if (!memcmp(wadfiles[i]->md5sum, md5sum, 16))
@@ -850,7 +849,6 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 			return W_InitFileError(filename, false);
 		}
 	}
-	*/
 #endif
 
 	// Do this immediately before anything of consequence that invalidates gamedata can happen.
@@ -990,6 +988,28 @@ INT32 W_InitMultipleFiles(char **filenames, boolean addons)
 	if (!numwadfiles)
 		I_Error("W_InitMultipleFiles: no files found");
 
+	return overallrc;
+}
+
+INT32 W_AddAutoloadedLocalFiles(char **filenames)
+{
+	UINT16 rc = 1;
+	INT32 overallrc = 1;
+
+	// will be realloced as lumps are added
+	for (; *filenames; filenames++)
+	{
+		rc = P_PartialAddWadFile(*filenames, true);
+		if (rc == UINT16_MAX)
+			CONS_Printf(M_GetText("Errors occurred while loading %s; not added.\n"), *filenames);
+		overallrc &= (rc != UINT16_MAX) ? 1 : 0;
+	}
+
+	if (!numwadfiles)
+		I_Error("W_AddAutoloadedLocalFiles: no files found");
+
+	if (P_PartialAddGetStage() >= 0)
+		P_MultiSetupWadFiles(true);
 	return overallrc;
 }
 
