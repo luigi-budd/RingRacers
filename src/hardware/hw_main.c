@@ -4724,11 +4724,21 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	{
 		if (cv_glmodels.value) //Yellow: Only MD2's dont disappear
 		{
-			if (thing->skin && thing->sprite == SPR_PLAY)
-				md2 = &md2_playermodels[( (skin_t *)thing->skin - skins )];
+			if ((thing->skin || thing->localskin) && thing->sprite == SPR_PLAY)
+				if (thing->localskin)
+					if (thing->skinlocal)
+						md2 = &md2_localplayermodels[( (skin_t *)thing->localskin - localskins )];
+					else
+						md2 = &md2_playermodels[( (skin_t *)thing->localskin - skins )];
+				else
+					md2 = &md2_playermodels[( (skin_t *)thing->skin - skins )];
+
 			else
 				md2 = &md2_models[thing->sprite];
-
+			
+			if (!md2)
+				return; //exits the function early
+			
 			if (md2->notfound || md2->scale < 0.0f)
 				return;
 		}

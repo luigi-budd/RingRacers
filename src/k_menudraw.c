@@ -484,12 +484,12 @@ void M_DrawMenuForeground(void)
 	}
 
 #if 0
-	// draw non-green resolution border
-	if ((!menuactive || currentMenu != &PAUSE_PlaybackMenuDef) && // this obscures replay menu and I want to put in minimal effort to fix that
-		((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
-	{
-		V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
-	}
+		// draw non-green resolution border
+		if ((!menuactive || currentMenu != &PAUSE_PlaybackMenuDef) && // this obscures replay menu and I want to put in minimal effort to fix that
+			((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
+		{
+			V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
+		}
 #endif
 }
 
@@ -940,7 +940,7 @@ static void M_DrawPausedText(INT32 x)
 	patch_t *pausebg = W_CachePatchName("M_STRIPU", PU_CACHE);
 	patch_t *pausetext = W_CachePatchName("M_PAUSET", PU_CACHE);
 
-	INT32 snapFlags = (V_SNAPTOLEFT|V_SNAPTOTOP); //menuactive ? 0 : (V_SNAPTOLEFT|V_SNAPTOTOP);
+	INT32 snapFlags = (V_SNAPTOLEFT|V_SNAPTOTOP);
 
 	V_DrawFixedPatch(x, -5*FRACUNIT, FRACUNIT, snapFlags|V_ADD, pausebg,   NULL);
 	V_DrawFixedPatch(x, -5*FRACUNIT, FRACUNIT, snapFlags,       pausetext, NULL);
@@ -1266,7 +1266,7 @@ static INT32 M_DrawRejoinIP(INT32 x, INT32 y, INT32 tx)
 	V_DrawMenuString(x - 10 - (skullAnimCounter/5), y, f, "\x1C"); // left arrow
 	V_DrawMenuString(x + w + 2+ (skullAnimCounter/5), y, f, "\x1D"); // right arrow
 	V_DrawThinString(x, y, f, text);
-	V_DrawRightAlignedThinString(BASEVIDWIDTH + 4 + tx, y, V_ORANGEMAP|V_SNAPTORIGHT, "\xAC Rejoin");
+	V_DrawRightAlignedThinString(BASEVIDWIDTH + 4 + tx, y, V_ORANGEMAP, "\xAC Rejoin");
 
 	return shift;
 }
@@ -1619,8 +1619,8 @@ static void M_DrawCharSelectCircle(setup_player_t *p, INT16 x, INT16 y)
 				n = (n + numoptions) % numoptions;
 
 				skin = setup_chargrid[p->gridx][p->gridy].skinlist[n];
-				patch = faceprefix[skin][FACE_RANK];
-				colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
+				patch = (setup_chargrid[p->gridx][p->gridy].skinlocal[n] ? localfaceprefix : faceprefix)[skin][FACE_RANK];
+				colormap = R_GetTranslationColormap(skin, (setup_chargrid[p->gridx][p->gridy].skinlocal[n] ? localskins : skins)[skin].prefcolor, GTC_MENUCACHE);
 				radius = 24<<FRACBITS;
 
 				cx -= (SHORT(patch->width) << FRACBITS) >> 1;
@@ -1821,15 +1821,15 @@ static void M_DrawCharSelectCircle(setup_player_t *p, INT16 x, INT16 y)
 }
 
 // returns false if the character couldn't be rendered
-boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap)
+boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 rotation, UINT32 frame, INT32 addflags, UINT8 *colormap, boolean local)
 {
 	UINT8 spr;
 	spritedef_t *sprdef;
 	spriteframe_t *sprframe;
 	patch_t *sprpatch;
 
-	spr = P_GetSkinSprite2(&skins[skin], spr2, NULL);
-	sprdef = &skins[skin].sprites[spr];
+	spr = P_GetSkinSprite2(&(local ? localskins : skins)[skin], spr2, NULL);
+	sprdef = &(local ? localskins : skins)[skin].sprites[spr];
 
 	if (!sprdef->numframes) // No frames ??
 		return false; // Can't render!
@@ -1844,11 +1844,11 @@ boolean M_DrawCharacterSprite(INT16 x, INT16 y, INT16 skin, UINT8 spr2, UINT8 ro
 		addflags ^= V_FLIP; // This sprite is left/right flipped!
 	}
 
-	if (skins[skin].highresscale != FRACUNIT)
+	if ((local ? localskins : skins)[skin].highresscale != FRACUNIT)
 	{
 		V_DrawFixedPatch(x<<FRACBITS,
 					y<<FRACBITS,
-					skins[skin].highresscale,
+					(local ? localskins : skins)[skin].highresscale,
 					addflags, sprpatch, colormap);
 	}
 	else
@@ -1940,7 +1940,7 @@ static void M_DrawCharSelectSprite(UINT8 num, INT16 x, INT16 y, boolean charflip
 
 	if (p->mdepth < CSSTEP_COLORS && p->mdepth != CSSTEP_ASKCHANGES)
 	{
-		color = skins[p->skin].prefcolor;
+		color = (p->localskin ? localskins : skins)[p->skin].prefcolor;
 	}
 	else
 	{
@@ -1949,13 +1949,13 @@ static void M_DrawCharSelectSprite(UINT8 num, INT16 x, INT16 y, boolean charflip
 
 	if (color == SKINCOLOR_NONE)
 	{
-		color = skins[p->skin].prefcolor;
+		color = (p->localskin ? localskins : skins)[p->skin].prefcolor;
 	}
 
 	colormap = R_GetTranslationColormap(p->skin, color, GTC_MENUCACHE);
 
 	M_DrawCharacterSprite(x, y, p->skin, SPR2_STIN, (charflip ? 1 : 7), ((p->mdepth == CSSTEP_READY) ? setup_animcounter : 0),
-		p->mdepth == CSSTEP_ASKCHANGES ? V_TRANSLUCENT : 0, colormap);
+		p->mdepth == CSSTEP_ASKCHANGES ? V_TRANSLUCENT : 0, colormap, p->localskin);
 }
 
 static void M_DrawCharSelectPreview(UINT8 num)
@@ -2132,8 +2132,8 @@ static void M_DrawCharSelectPreview(UINT8 num)
 					&& setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum] < numskins)
 				{
 					V_DrawThinString(x-3, y+12, 0,
-						skins[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].name);
-					randomskin = (skins[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].flags & SF_IRONMAN);
+						(setup_chargrid[p->gridx][p->gridy].skinlocal[p->clonenum] ? localskins : skins)[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].name);
+					randomskin = ((setup_chargrid[p->gridx][p->gridy].skinlocal[p->clonenum] ? localskins : skins)[setup_chargrid[p->gridx][p->gridy].skinlist[p->clonenum]].flags & SF_IRONMAN);
 				}
 				else
 				{
@@ -2380,7 +2380,7 @@ void M_DrawProfileCard(INT32 x, INT32 y, boolean greyedout, profile_t *p)
 		{
 			UINT8 *ccolormap = R_GetTranslationColormap(skinnum, truecol, GTC_MENUCACHE);
 
-			if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap))
+			if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap, false))
 				V_DrawMappedPatch(x+14, y+66, 0, faceprefix[skinnum][FACE_RANK], ccolormap);
 		}
 
@@ -2407,7 +2407,7 @@ void M_DrawProfileCard(INT32 x, INT32 y, boolean greyedout, profile_t *p)
 		else
 			ccolormap = R_GetTranslationColormap(TC_BLINK, truecol, GTC_MENUCACHE);
 
-		if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap))
+		if (M_DrawCharacterSprite(x-22, y+119, skinnum, SPR2_STIN, 7, 0, 0, ccolormap, false))
 		{
 			V_DrawMappedPatch(x+14, y+66, 0, faceprefix[skinnum][FACE_RANK], ccolormap);
 		}
@@ -2455,6 +2455,7 @@ void M_DrawCharacterSelect(void)
 	UINT8 priority = 0;
 	INT16 quadx, quady;
 	INT16 skin;
+	boolean localskin = false;
 	INT32 basex = optionsmenu.profile ? (64 + M_EaseWithTransition(Easing_InSine, 5 * 48)) : 0;
 	boolean forceskin = M_CharacterSelectForceInAction();
 
@@ -2507,7 +2508,9 @@ void M_DrawCharacterSelect(void)
 	}
 
 	// Draw this inbetween. These drop shadows should be covered by the stat graph, but the icons shouldn't.
-	V_DrawScaledPatch(basex+ 3, 2, 0, W_CachePatchName((optionsmenu.profile ? "PR_STGRPH" : "STATGRPH"), PU_CACHE));
+	// Make the stat graph blue for localskins so you know which one youre choosing
+	V_DrawScaledPatch(basex+ 3, 2, 0, W_CachePatchName((optionsmenu.profile ? "PR_STGRPH" : (PLAY_CharSelectDef.extra2 == 1 ? "STTGRPH2" : "STATGRPH")), PU_CACHE));
+
 
 	// Draw the icons now
 	for (i = 0; i < 9; i++)
@@ -2527,6 +2530,7 @@ void M_DrawCharacterSelect(void)
 			{
 				skin = setup_chargrid[i][j].skinlist[setup_page];
 			}
+			localskin = setup_chargrid[i][j].skinlocal[setup_page];
 
 			for (k = 0; k < setup_numplayers; k++)
 			{
@@ -2547,9 +2551,9 @@ void M_DrawCharacterSelect(void)
 				if (k == setup_numplayers)
 					colormap = R_GetTranslationColormap(TC_RAINBOW, SKINCOLOR_GREY, GTC_MENUCACHE);
 				else
-					colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
+					colormap = R_GetTranslationColormap(skin, (localskin ? localskins : skins)[skin].prefcolor, GTC_MENUCACHE);
 
-				V_DrawMappedPatch(basex + 82 + (i*16) + quadx, 22 + (j*16) + quady, 0, faceprefix[skin][FACE_RANK], colormap);
+				V_DrawMappedPatch(basex + 82 + (i*16) + quadx, 22 + (j*16) + quady, 0, (localskin ? localfaceprefix : faceprefix)[skin][FACE_RANK], colormap);
 
 				// draw dot if there are more alts behind there!
 				if (forceskin == false && setup_page+1 < setup_chargrid[i][j].numskins)
@@ -6097,7 +6101,7 @@ void M_DrawPause(void)
 	}
 	else
 	{
-		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP|V_SNAPTOLEFT, M_GetGameplayMode());
+		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP, M_GetGameplayMode());
 	}
 }
 
@@ -6946,7 +6950,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			if (skin != -1)
 			{
 				colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
-				M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap);
+				M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap, false);
 
 				for (i = 0; i < skin; i++)
 				{
@@ -6974,7 +6978,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			if (skin == -1)
 				skin = 0;
 			colormap = R_GetTranslationColormap(TC_BLINK, SKINCOLOR_BLACK, GTC_MENUCACHE);
-			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap);
+			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap, false);
 
 			// Draw follower next to them
 			if (fskin != -1)
@@ -7004,7 +7008,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 			colormap = R_GetTranslationColormap(skin, colorid, GTC_MENUCACHE);
 
 			// Draw reference for character bathed in coloured slime
-			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap);
+			M_DrawCharacterSprite(x, y, skin, SPR2_STIN, 7, 0, V_SNAPTOBOTTOM, colormap, false);
 			break;
 		}
 		case SECRET_CUP:
@@ -7350,7 +7354,7 @@ static void M_DrawChallengePreview(INT32 x, INT32 y)
 					pushed = strcmp(song, mapheaderinfo[map]->musname[musicid]) == 0;
 				}
 
-				K_drawButton(x*FRACUNIT, y*FRACUNIT, 0|V_SNAPTOBOTTOM, kp_button_a[1], pushed);
+				K_drawButton(x*FRACUNIT, y*FRACUNIT, 0, kp_button_a[1], pushed);
 				x += SHORT(kp_button_a[1][0]->width);
 				V_DrawThinString(x, y + 1, (pushed ? V_GRAYMAP : highlightflags)|V_SNAPTOBOTTOM, "Play CD");
 			}
@@ -7432,7 +7436,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 	K_drawButton(
 		24 << FRACBITS,
 		16 << FRACBITS,
-		V_SNAPTOLEFT, kp_button_c[1],
+		V_SNAPTOBOTTOM, kp_button_c[1],
 		keybuttonpress
 	);
 
@@ -7451,9 +7455,9 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 		}
 
 		if (offs > 0)
-			V_DrawFill(1+2, keybary, offs, 1, 0|V_SNAPTOLEFT);
+			V_DrawFill(1+2, keybary, offs, 1, 0|V_SNAPTOBOTTOM);
 		if (offs < keybarlen)
-			V_DrawFadeFill(1+2+offs, keybary, keybarlen-offs, 1, V_SNAPTOLEFT, 31, challengetransparentstrength);
+			V_DrawFadeFill(1+2+offs, keybary, keybarlen-offs, 1, V_SNAPTOBOTTOM, 31, challengetransparentstrength);
 	}
 
 	// Counter
@@ -7467,14 +7471,14 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 		numbers[3] = ((gamedata->chaokeys / 1000) % 10);
 		if (numbers[3] != 0)
 		{
-			V_DrawScaledPatch(textx - 4, texty, V_SNAPTOLEFT, kp_facenum[numbers[3]]);
+			V_DrawScaledPatch(textx - 4, texty, V_SNAPTOBOTTOM, kp_facenum[numbers[3]]);
 			textx += 2;
 		}
 
 		UINT8 i = 0;
 		while (i < 3)
 		{
-			V_DrawScaledPatch(textx, texty, V_SNAPTOLEFT, kp_facenum[numbers[i]]);
+			V_DrawScaledPatch(textx, texty, V_SNAPTOBOTTOM, kp_facenum[numbers[i]]);
 			textx += 6;
 			i++;
 		}
@@ -7490,7 +7494,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 			handx -= (skullAnimCounter/5);
 		}
 
-		V_DrawScaledPatch(handx, 8, V_FLIP|V_SNAPTOLEFT,
+		V_DrawScaledPatch(handx, 8, V_FLIP|V_SNAPTOBOTTOM,
 			W_CachePatchName("M_CURSOR", PU_CACHE));
 	}
 
@@ -7558,7 +7562,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 					{
 						INT32 time = (major ? 5 : 3) - (keyholdrotation - 1) / (90 * FRACUNIT);
 						if (time <= 5 && time >= 0)
-							V_DrawScaledPatch(tilex + 2, tiley - 2, V_SNAPTOLEFT, kp_eggnum[time]);
+							V_DrawScaledPatch(tilex + 2, tiley - 2, V_SNAPTOBOTTOM, kp_eggnum[time]);
 					}
 				}
 
@@ -7576,7 +7580,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 				thiskeyy -= FixedMul(radius, FINECOSINE(ang));
 			}
 
-			V_DrawFixedPatch(thiskeyx, thiskeyy, FRACUNIT, V_SNAPTOLEFT, key, NULL);
+			V_DrawFixedPatch(thiskeyx, thiskeyy, FRACUNIT, V_SNAPTOBOTTOM, key, NULL);
 		}
 	}
 
@@ -7590,7 +7594,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 			lastkeycolormap = R_GetTranslationColormap(TC_BLINK, SKINCOLOR_BLACK, GTC_MENUCACHE);
 		}
 
-		V_DrawFixedPatch(keyx, keyy, FRACUNIT, V_SNAPTOLEFT, key, lastkeycolormap);
+		V_DrawFixedPatch(keyx, keyy, FRACUNIT, V_SNAPTOBOTTOM, key, lastkeycolormap);
 
 		// Extra glowverlay if you can use a Chao Key
 		if (keysbeingused == 0 && M_CanKeyHiliTile())
@@ -7603,7 +7607,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 					: (10 - trans)
 				) << V_ALPHASHIFT;
 
-				V_DrawFixedPatch(keyx, keyy, FRACUNIT, trans|V_SNAPTOLEFT, key,
+				V_DrawFixedPatch(keyx, keyy, FRACUNIT, trans|V_SNAPTOBOTTOM, key,
 					R_GetTranslationColormap(TC_ALLWHITE, 0, GTC_MENUCACHE)
 				);
 			}
@@ -7790,7 +7794,7 @@ void M_DrawChallenges(void)
 
 	y = currentMenu->y;
 
-	V_DrawFadeFill(0, y-2, BASEVIDWIDTH, (challengesgridstep * CHALLENGEGRIDHEIGHT) + 2, 0, 31, challengetransparentstrength);
+	V_DrawFadeFill(0, y-2, BASEVIDWIDTH, (challengesgridstep * CHALLENGEGRIDHEIGHT) + 2, V_SNAPTOBOTTOM, 31, challengetransparentstrength);
 
 	x -= (challengesgridstep-1);
 
@@ -7894,8 +7898,8 @@ challengedesc:
 		V_DrawFill(0, endy, endlen, 11, 24|V_SNAPTOLEFT);
 		V_DrawFixedPatch(endlen*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_FLIP|V_SNAPTOLEFT, endwing, NULL);
 
-		V_DrawFill(BASEVIDWIDTH - endlen, endy, endlen, 11, 24|V_SNAPTORIGHT);
-		V_DrawFixedPatch((BASEVIDWIDTH - endlen)*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_SNAPTORIGHT, endwing, NULL);
+		V_DrawFill(BASEVIDWIDTH - endlen, endy, endlen, 11, 24|V_SNAPTOLEFT);
+		V_DrawFixedPatch((BASEVIDWIDTH - endlen)*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_SNAPTOLEFT, endwing, NULL);
 	}
 
 	// Percentage
@@ -7977,7 +7981,7 @@ challengedesc:
 		)
 	)
 	{
-		V_DrawCenteredThinString(BASEVIDWIDTH/2, 120 + 32, V_SNAPTOBOTTOM, challengesmenu.unlockcondition);
+		V_DrawCenteredThinString(BASEVIDWIDTH/2, 120 + 32, V_SNAPTORIGHT, challengesmenu.unlockcondition);
 	}
 }
 
@@ -8346,18 +8350,18 @@ static void M_DrawStatsChars(void)
 
 	if (!statisticsmenu.maplist || !statisticsmenu.nummaps)
 	{
-		V_DrawCenteredThinString(BASEVIDWIDTH/2, 70, V_SNAPTOLEFT, "No chars!?");
+		V_DrawCenteredThinString(BASEVIDWIDTH/2, 70, 0, "No chars!?");
 		return;
 	}
 
 	if (location)
 		V_DrawMenuString(10, y-(skullAnimCounter/5),
-			highlightflags|V_SNAPTOLEFT, "\x1A"); // up arrow
+			highlightflags, "\x1A"); // up arrow
 
 	i = -1;
 
-	V_DrawThinString(20, y - 10, highlightflags|V_SNAPTOLEFT, "CHARACTER");
-	V_DrawRightAlignedThinString(BASEVIDWIDTH/2 + 34, y - 10, highlightflags|V_SNAPTOLEFT, "WINS/ROUNDS");
+	V_DrawThinString(20, y - 10, highlightflags, "CHARACTER");
+	V_DrawRightAlignedThinString(BASEVIDWIDTH/2 + 34, y - 10, highlightflags, "WINS/ROUNDS");
 
 	while ((skin = statisticsmenu.maplist[++i]) < numskins)
 	{
@@ -8370,12 +8374,12 @@ static void M_DrawStatsChars(void)
 		{
 			UINT8 *colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
 
-			M_DrawCharacterIconAndEngine(24, y, skin, colormap, skin, V_SNAPTOLEFT);
+			M_DrawCharacterIconAndEngine(24, y, skin, colormap, skin, 0);
 		}
 
-		V_DrawThinString(24+32+2, y+3, V_SNAPTOLEFT, skins[skin].realname);
+		V_DrawThinString(24+32+2, y+3, 0, skins[skin].realname);
 
-		V_DrawRightAlignedThinString(BASEVIDWIDTH/2 + 30, y+3, V_SNAPTOLEFT, va("%d/%d", skins[skin].records.wins, skins[skin].records.rounds));
+		V_DrawRightAlignedThinString(BASEVIDWIDTH/2 + 30, y+3, 0, va("%d/%d", skins[skin].records.wins, skins[skin].records.rounds));
 
 		y += STATSSTEP;
 
@@ -8386,19 +8390,19 @@ static void M_DrawStatsChars(void)
 bottomarrow:
 	if (dobottomarrow)
 		V_DrawMenuString(10, BASEVIDHEIGHT-20 + (skullAnimCounter/5),
-			highlightflags|V_SNAPTOLEFT, "\x1B"); // down arrow
+			highlightflags, "\x1B"); // down arrow
 
 	UINT32 x = BASEVIDWIDTH - 20 - 90;
 	y = 88;
 
-	V_DrawCenteredThinString(x + 45, y - 10, highlightflags|V_SNAPTORIGHT, "HEATMAP");
+	V_DrawCenteredThinString(x + 45, y - 10, highlightflags, "HEATMAP");
 
-	V_DrawFadeFill(x, y, 91, 91, V_SNAPTORIGHT, 31, 8); // challengetransparentstrength
+	V_DrawFadeFill(x, y, 91, 91, 0, 31, 8); // challengetransparentstrength
 
-	V_DrawFill(x+30, y+1,  1, 89,  0|V_SNAPTORIGHT);
-	V_DrawFill(x+60, y+1,  1, 89,  0|V_SNAPTORIGHT);
-	V_DrawFill(x+1,  y+30, 89, 1,  0|V_SNAPTORIGHT);
-	V_DrawFill(x+1,  y+60, 89, 1,  0|V_SNAPTORIGHT);
+	V_DrawFill(x+30, y+1,  1, 89,  0);
+	V_DrawFill(x+60, y+1,  1, 89,  0);
+	V_DrawFill(x+1,  y+30, 89, 1,  0);
+	V_DrawFill(x+1,  y+60, 89, 1,  0);
 
 	x++;
 	y++;
@@ -8415,7 +8419,7 @@ bottomarrow:
 				y + (j * 10),
 				9,
 				9,
-				(31 - ((statisticsmenu.statgridplayed[i][j] - 1) * 32) / FRACUNIT)|V_SNAPTORIGHT
+				31 - ((statisticsmenu.statgridplayed[i][j] - 1) * 32) / FRACUNIT
 			);
 		}
 	}
@@ -8439,7 +8443,7 @@ static void M_DrawStatsGP(void)
 
 	if (location)
 		V_DrawMenuString(10, y-(skullAnimCounter/5),
-			highlightflags|V_SNAPTOLEFT, "\x1A"); // up arrow
+			highlightflags, "\x1A"); // up arrow
 
 	const INT32 width = 53;
 
@@ -8458,20 +8462,20 @@ static void M_DrawStatsGP(void)
 	{
 		if (j == KARTSPEED_EASY || !gamedata->everseenspecial)
 		{
-			V_DrawFadeFill(x + 6, y + 1, width - (12 + 1), h, V_SNAPTORIGHT, 31, 6 + (j & 1)*2);
-			V_DrawCenteredThinString(x + 19 + 7, y - 10, highlightflags|V_FORCEUPPERCASE|V_SNAPTORIGHT, gpdifficulty_cons_t[j].strvalue);
+			V_DrawFadeFill(x + 6, y + 1, width - (12 + 1), h, 0, 31, 6 + (j & 1)*2);
+			V_DrawCenteredThinString(x + 19 + 7, y - 10, highlightflags|V_FORCEUPPERCASE, gpdifficulty_cons_t[j].strvalue);
 			x += (12 + 1);
 		}
 		else
 		{
-			V_DrawFadeFill(x - 7, y + 1, width, h, V_SNAPTORIGHT, 31, 6 + (j & 1)*2);
-			V_DrawCenteredThinString(x + 19, y - 10, highlightflags|V_FORCEUPPERCASE|V_SNAPTORIGHT, gpdifficulty_cons_t[j].strvalue);
+			V_DrawFadeFill(x - 7, y + 1, width, h, 0, 31, 6 + (j & 1)*2);
+			V_DrawCenteredThinString(x + 19, y - 10, highlightflags|V_FORCEUPPERCASE, gpdifficulty_cons_t[j].strvalue);
 		}
 	}
 
 	i = -1;
 
-	V_DrawThinString(20, y - 10, highlightflags|V_SNAPTOLEFT, "CUP");
+	V_DrawThinString(20, y - 10, highlightflags, "CUP");
 
 	cupheader_t *cup = kartcupheaders;
 
@@ -8494,12 +8498,12 @@ static void M_DrawStatsGP(void)
 			goto bottomarrow;
 		}
 
-		V_DrawFill(24, y+1, 21, 20, 31|V_SNAPTOLEFT);
+		V_DrawFill(24, y+1, 21, 20, 31);
 
-		V_DrawScaledPatch(24-1, y, V_SNAPTOLEFT, W_CachePatchName(cup->icon, PU_CACHE));
-		V_DrawScaledPatch(24-1, y, V_SNAPTOLEFT, W_CachePatchName("CUPBOX", PU_CACHE));
+		V_DrawScaledPatch(24-1, y, 0, W_CachePatchName(cup->icon, PU_CACHE));
+		V_DrawScaledPatch(24-1, y, 0, W_CachePatchName("CUPBOX", PU_CACHE));
 
-		V_DrawThinString(24+21+2, y + 7, V_SNAPTOLEFT, cup->realname);
+		V_DrawThinString(24+21+2, y + 7, 0, cup->realname);
 
 		x = 7 + BASEVIDWIDTH - 20 - width;
 		for (j = endj; j >= KARTSPEED_EASY; j--)
@@ -8516,7 +8520,7 @@ static void M_DrawStatsGP(void)
 bottomarrow:
 	if (dobottomarrow)
 		V_DrawMenuString(10, BASEVIDHEIGHT-20 + (skullAnimCounter/5),
-			highlightflags|V_SNAPTOLEFT, "\x1B"); // down arrow
+			highlightflags, "\x1B"); // down arrow
 }
 
 #undef STATSSTEP
@@ -8674,13 +8678,13 @@ void M_DrawStatistics(void)
 			0, "\x1D"); // right arrow
 	}
 
-	V_DrawThinString(20, 30, highlightflags|V_SNAPTOLEFT, "Total Play Time:");
+	V_DrawThinString(20, 30, highlightflags, "Total Play Time:");
 
 	M_GetStatsTime(beststr, gamedata->totalplaytime);
-	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 30, V_SNAPTORIGHT, beststr);
+	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 30, 0, beststr);
 	beststr[0] = 0;
 
-	V_DrawThinString(20, 40, highlightflags|V_SNAPTOLEFT, "Total Rings:");
+	V_DrawThinString(20, 40, highlightflags, "Total Rings:");
 	if (gamedata->totalrings > GDMAX_RINGS)
 	{
 		sprintf(beststr, "%c999,999,999+", '\x82');
@@ -8697,10 +8701,10 @@ void M_DrawStatistics(void)
 	{
 		sprintf(beststr, "%u", gamedata->totalrings);
 	}
-	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 40, V_SNAPTORIGHT, va("%s collected", beststr));
+	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 40, 0, va("%s collected", beststr));
 
 	beststr[0] = 0;
-	V_DrawThinString(20, 50, highlightflags|V_SNAPTOLEFT, "Total Rounds:");
+	V_DrawThinString(20, 50, highlightflags, "Total Rounds:");
 
 	strcat(beststr, va("%u Race", gamedata->roundsplayed[GDGT_RACE]));
 
@@ -8721,7 +8725,7 @@ void M_DrawStatistics(void)
 		strcat(beststr, va(", %u Custom", gamedata->roundsplayed[GDGT_CUSTOM]));
 	}
 
-	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 50, V_SNAPTORIGHT, beststr);
+	V_DrawRightAlignedThinString(BASEVIDWIDTH-20, 50, 0, beststr);
 }
 
 static void M_DrawWrongPlayer(UINT8 i)
@@ -8739,7 +8743,8 @@ static void M_DrawWrongPlayer(UINT8 i)
 		wrongpl.spinout ? SPR2_SPIN : SPR2_SLWN,
 		wrongpl.spinout ? ((wrongpl.across/8) & 7) : 6,
 		(wrongwarp.ticker+i),
-		0, colormap
+		0, colormap,
+		false
 	);
 #undef wrongpl
 }

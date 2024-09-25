@@ -18,7 +18,6 @@
 #include "../p_local.h" // cv_tilting
 #include "../r_main.h"	// cv_flipcam
 
-
 extern "C" consvar_t cv_mindelay, cv_drawinput;
 
 using srb2::Draw;
@@ -118,6 +117,9 @@ menuitem_t OPTIONS_ProfileAccessibility[] = {
 
 	{IT_STRING | IT_CVAR, "Field of View", "Higher FOV lets you see more.",
 		NULL, {.cvar = &cv_dummyprofilefov}, 0, 0},
+
+	{IT_SPACE | IT_NOTHING, NULL,  NULL,
+		NULL, {NULL}, 0, 0},
 
 	{IT_HEADER, "For all Profiles:", NULL,
 		NULL, {NULL}, 0, 0},

@@ -591,7 +591,8 @@ void Y_PlayerStandingsDrawer(y_data_t *standings, INT32 xoffset)
 					(datarightofcolumn ? 1 : 7),
 					0,
 					0,
-					charcolormap
+					charcolormap,
+					false
 				);
 
 				duelx += 8;
@@ -2164,18 +2165,18 @@ void Y_PlayIntermissionMusic(void)
 		{
 			//copy paste from noire lOL
 			player_t* bestplayer = &players[data.mainplayer];
-			
+
 			// somehow null.
 			if (bestplayer == NULL)
 			{
 				Music_Remap("intermission", "racent");
-				
+
 				if (!Music_Playing("intermission"))
 					Music_Play("intermission");
-				
+
 				return;
 			}
-			
+
 			if (bestplayer->pflags & PF_NOCONTEST)
 				Music_Remap("intermission", "racenc"); // fzero lose
 			else if (K_IsPlayerLosing(bestplayer) == true)
