@@ -2456,10 +2456,12 @@ static void Command_connect(void)
 	restoreMenu = &PLAY_MP_OptSelectDef;
 	currentMenu->lastOn = itemOn;
 
-	tic_t musicelapsed = Music_Elapsed("menu");
-	Music_Remap("menu", "NETMDE");
-	Music_Seek("menu", musicelapsed * 1000UL / TICRATE);
-	Music_Play("menu");
+	Music_Remap("menu", "NETMD2");
+
+	if (stricmp(Music_CurrentSong(), "NETMD2"))
+	{
+		Music_Play("menu");
+	}
 
 	if (setup_numplayers == 0)
 	{

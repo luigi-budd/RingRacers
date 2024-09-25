@@ -34,7 +34,6 @@
 #include "m_misc.h"
 #include "i_system.h"
 #include "p_setup.h"
-#include "k_kart.h"
 
 #include "r_local.h"
 #include "r_fps.h"
@@ -591,7 +590,8 @@ void Y_PlayerStandingsDrawer(y_data_t *standings, INT32 xoffset)
 					(datarightofcolumn ? 1 : 7),
 					0,
 					0,
-					charcolormap
+					charcolormap,
+					false
 				);
 
 				duelx += 8;
@@ -2162,28 +2162,7 @@ void Y_PlayIntermissionMusic(void)
 		}
 		else
 		{
-			//copy paste from noire lOL
-			player_t* bestplayer = &players[data.mainplayer];
-			
-			// somehow null.
-			if (bestplayer == NULL)
-			{
-				Music_Remap("intermission", "racent");
-				
-				if (!Music_Playing("intermission"))
-					Music_Play("intermission");
-				
-				return;
-			}
-			
-			if (bestplayer->pflags & PF_NOCONTEST)
-				Music_Remap("intermission", "racenc"); // fzero lose
-			else if (K_IsPlayerLosing(bestplayer) == true)
-				Music_Remap("intermission", "racels"); // cue the 2pac music
-			else if (bestplayer->position == 1) // first place!
-				Music_Remap("intermission", "racewn"); // practice
-			else // nothing else.
-				Music_Remap("intermission", "racent");
+			Music_Remap("intermission", "gprnd5");
 		}
 	}
 	else
