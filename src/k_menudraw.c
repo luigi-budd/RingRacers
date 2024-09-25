@@ -3503,7 +3503,7 @@ void M_DrawLevelSelect(void)
 		map = M_GetNextLevelInList(map, &j, &levellist.levelsearch);
 	}
 
-	M_DrawCupTitle(tay, &levellist.levelsearch);
+	M_DrawCupTitle(tay, &levellist.levelsearch, 0);
 }
 
 static boolean M_LevelSelectHasBG(menu_t *check)
@@ -8373,7 +8373,7 @@ static void M_DrawStatsChars(void)
 		{
 			UINT8 *colormap = R_GetTranslationColormap(skin, skins[skin].prefcolor, GTC_MENUCACHE);
 
-			M_DrawCharacterIconAndEngine(24, y, skin, colormap, skin);
+			M_DrawCharacterIconAndEngine(24, y, skin, colormap, skin, 0);
 		}
 
 		V_DrawThinString(24+32+2, y+3, 0, skins[skin].realname);
