@@ -9314,6 +9314,10 @@ UINT16 P_PartialAddWadFile(const char *wadfilename, boolean local)
 	char *name;
 	lumpinfo_t *lumpinfo;
 
+#ifdef PARANOIA
+	wadnum = 0;
+#endif
+
 	// Vars to help us with the position start and amount of each resource type.
 	// Useful for PK3s since they use folders.
 	// WADs use markers for some resources, but others such as sounds are checked lump-by-lump anyway.
