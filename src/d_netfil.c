@@ -564,7 +564,7 @@ INT32 CL_CheckFiles(void)
 #endif
 		for (i = 0; i < fileneedednum || j < numwadfiles;)
 		{
-			if (j < numwadfiles && !wadfiles[j]->important)
+			if (j < numwadfiles && (!wadfiles[j]->important || wadfiles[j]->localfile))
 			{
 				// Unimportant on our side.
 				++j;

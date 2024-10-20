@@ -300,23 +300,37 @@ void M_DrawMenuBackground(void)
 		bgMapImage = W_CachePatchName("MENUBG4", PU_CACHE);
 	}
 
-	V_DrawFixedPatch(0, 0, FRACUNIT, 0, bgMapImage, R_GetTranslationColormap(TC_RAINBOW, SKINCOLOR_SLATE, GTC_MENUCACHE));
-	V_DrawFixedPatch(0, 0, FRACUNIT, V_ADD, W_CachePatchName("MENUCUTD", PU_CACHE), NULL);
-	V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("MENUCUT", PU_CACHE), NULL);
+	boolean greenres = ((vid.width % BASEVIDWIDTH == 0) && (vid.height % BASEVIDHEIGHT == 0));
+	fixed_t bgMapImageScale = greenres ? FRACUNIT : FixedDiv((vid.width / vid.dupx)*FRACUNIT, (vid.height / vid.dupy)*FRACUNIT);
+
+	/*
+	CONS_Printf("size inc: %f\n",
+		FIXED_TO_FLOAT(bgMapImageScale)
+	);
+	*/
+	
+	V_DrawFixedPatch(0, 0, 
+		bgMapImageScale, 
+		V_SNAPTOLEFT|V_SNAPTOTOP,
+		bgMapImage, R_GetTranslationColormap(TC_RAINBOW, SKINCOLOR_SLATE, GTC_MENUCACHE)
+	);
+	V_DrawFixedPatch(0, 0, FRACUNIT, V_ADD|V_SNAPTOLEFT, W_CachePatchName("MENUCUTD", PU_CACHE), NULL);
+	V_DrawFixedPatch(0, 0, FRACUNIT, V_SNAPTOLEFT, W_CachePatchName("MENUCUT", PU_CACHE), NULL);
 
 	V_DrawFixedPatch(-bgImageScroll, 0, FRACUNIT, V_SNAPTOLEFT, W_CachePatchName("MENUBG1", PU_CACHE), NULL);
 	V_DrawFixedPatch(-bgImageScroll, 0, FRACUNIT, V_SNAPTOLEFT, W_CachePatchName(bgImageName, PU_CACHE), NULL);
 
 	V_DrawFixedPatch(0, (BASEVIDHEIGHT + 16) * FRACUNIT, FRACUNIT, V_SUBTRACT, W_CachePatchName("MENUBG2", PU_CACHE), NULL);
 
+	//we MIGHT need to draw another to get a clean loop on widescreen...
 	V_DrawFixedPatch(8 * FRACUNIT, -bgText1Scroll,
 		FRACUNIT, V_SUBTRACT, text1, NULL);
 	V_DrawFixedPatch(8 * FRACUNIT, -bgText1Scroll + text1loop,
 		FRACUNIT, V_SUBTRACT, text1, NULL);
 
-	V_DrawFixedPatch(-bgText2Scroll, (BASEVIDHEIGHT-8) * FRACUNIT,
+	V_DrawFixedPatch(-bgText2Scroll, (vid.height-8) * FRACUNIT,
 		FRACUNIT, V_ADD, text2, NULL);
-	V_DrawFixedPatch(-bgText2Scroll + text2loop, (BASEVIDHEIGHT-8) * FRACUNIT,
+	V_DrawFixedPatch(-bgText2Scroll + text2loop, (vid.height-8) * FRACUNIT,
 		FRACUNIT, V_ADD, text2, NULL);
 
 	if (renderdeltatics > 2*FRACUNIT)
