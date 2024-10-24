@@ -1327,6 +1327,7 @@ void M_DrawUnderline(INT32 left, INT32 right, INT32 y, INT32 flags);
 // For some menu highlights
 UINT16 M_GetCvPlayerColor(UINT8 pnum);
 
+fixed_t M_GetBGSize(void);
 void M_PickMenuBGMap(void);
 void M_UpdateMenuBGImage(boolean forceReset);
 void M_DrawMenuBackground(void);

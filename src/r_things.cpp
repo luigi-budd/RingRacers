@@ -850,6 +850,10 @@ UINT8 *R_GetSpriteTranslation(vissprite_t *vis)
 	{
 		skinnum = (skin_t*)vis->mobj->skin-skins;
 
+		//Lua might set a mobj skin to a local skin, so avoid crashes here
+		if (((skin_t *)vis->mobj->skin)->localskin && vis->mobj->skin == vis->mobj->localskin)
+			skinnum = TC_DEFAULT;
+
 		// Hide not-yet-unlocked characters in replays from other people
 		if (!R_CanShowSkinInDemo(skinnum))
 		{

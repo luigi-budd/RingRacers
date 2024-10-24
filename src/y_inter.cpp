@@ -1492,7 +1492,7 @@ void Y_DrawIntermissionHeader(fixed_t x, fixed_t y, boolean gotthrough, const ch
 {
 	const INT32 v_width = (small ? BASEVIDWIDTH/2 : BASEVIDWIDTH);
 	const fixed_t frac = (small ? FRACUNIT/2 : FRACUNIT);
-	const INT32 small_flag = (small ? V_SPLITSCREEN : 0);
+	const INT32 small_flag = (small ? V_SPLITSCREEN : 0)|V_SNAPTOTOP;
 
 	if (small && r_splitscreen > 1)
 	{
@@ -1565,7 +1565,7 @@ static void Y_DrawMapTitleString(fixed_t x, const char *name)
 		FRACUNIT,
 		FRACUNIT,
 		FRACUNIT,
-		V_SUBTRACT | V_60TRANS,
+		V_SUBTRACT | V_60TRANS|V_SNAPTOBOTTOM,
 		NULL,
 		LSHI_FONT,
 		name
@@ -1638,20 +1638,22 @@ void Y_IntermissionDrawer(void)
 	UINT8 *bgcolor = R_GetTranslationColormap(TC_INTERMISSION, static_cast<skincolornum_t>(0), GTC_CACHE);
 
 	// Draw the background
-	K_DrawMapThumbnail(0, 0, BASEVIDWIDTH<<FRACBITS, (data.encore ? V_FLIP : 0), prevmap, bgcolor);
+	K_DrawMapThumbnail(0, 0, FixedMul(640*FRACUNIT,FixedDiv((vid.width/vid.dupx)*FRACUNIT,640*FRACUNIT)), (data.encore ? V_FLIP : 0)|V_SNAPTOLEFT|V_SNAPTOTOP, prevmap, bgcolor);
 
-	for (x = -mqscroll; x < (BASEVIDWIDTH * FRACUNIT); x += mqloop)
+	for (x = -mqscroll; x < (vid.width * FRACUNIT); x += mqloop)
 	{
-		V_DrawFixedPatch(x, 154<<FRACBITS, FRACUNIT, V_SUBTRACT, rrmq, NULL);
+		V_DrawFixedPatch(x, 154<<FRACBITS, FRACUNIT, V_SUBTRACT|V_SNAPTOBOTTOM, rrmq, NULL);
 	}
 
-	V_DrawFixedPatch(chkscroll, 0, FRACUNIT, V_SUBTRACT, rbgchk, NULL);
-	V_DrawFixedPatch(chkscroll - chkloop, 0, FRACUNIT, V_SUBTRACT, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll + chkloop*2, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll + chkloop, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll - chkloop, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
 
 	fixed_t ttlloop = Y_DrawMapTitle();
 
 	// Animate scrolling elements if relevant
-	if (!paused && !P_AutoPause())
+	//if (!paused && !P_AutoPause())
 	{
 		mqscroll += renderdeltatics;
 		if (mqscroll > mqloop)
@@ -1714,7 +1716,7 @@ skiptallydrawer:
 
 finalcounter:
 	if ((modeattacking == ATTACKING_NONE) && demo.recording)
-		ST_DrawSaveReplayHint(0);
+		ST_DrawSaveReplayHint(V_SNAPTORIGHT|V_SNAPTOTOP);
 
 	if (Y_CanSkipIntermission())
 	{
@@ -1730,7 +1732,7 @@ finalcounter:
 			2*FRACUNIT,
 			(BASEVIDHEIGHT - (2+8))*FRACUNIT,
 			FRACUNIT,
-			0, NULL,
+			V_SNAPTOLEFT|V_SNAPTOBOTTOM, NULL,
 			OPPRF_FONT,
 			va("%d", tickDown)
 		);

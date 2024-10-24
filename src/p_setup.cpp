@@ -8302,15 +8302,18 @@ void P_LoadLevelMusic(void)
 			Music_BatchExempt("level_nosync");
 		}
 		Music_StopAll();
-		Music_Remap("level_nosync", music);
+		Music_Remap("level_nosync", players[consoleplayer].spectator ? "SPECTR" : music);
 	}
 	else
 	{
 		Music_StopAll();
-		Music_Remap("level", music);
+		Music_Remap("level", players[consoleplayer].spectator ? "SPECTR" : music);
 
-		tic_t level_music_start = starttime + (TICRATE/2);
-		Music_Seek("level", (std::max(leveltime, level_music_start) - level_music_start) * 1000UL / TICRATE);
+		if (!players[consoleplayer].spectator)
+		{
+			tic_t level_music_start = starttime + (TICRATE/2);
+			Music_Seek("level", (std::max(leveltime, level_music_start) - level_music_start) * 1000UL / TICRATE);
+		}
 	}
 
 	Music_ResetLevelVolume();

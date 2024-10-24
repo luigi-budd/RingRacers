@@ -3089,6 +3089,10 @@ void G_SpectatePlayerOnJoin(INT32 playernum)
 
 		// A ha! An established player! It's time to spectate
 		players[playernum].spectator = true;
+		
+		//Set this here because otherwise joining midgame wouldnt, LOL
+		if (playernum == consoleplayer)
+			S_AttemptToRestoreMusic();
 		break;
 	}
 }

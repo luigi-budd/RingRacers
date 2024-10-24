@@ -624,6 +624,9 @@ void M_PlayMenuJam(void)
 
 	Music_Remap("menu", cv_menujam.string);
 	Music_Play("menu");
+
+	if (cv_menujam.value == 3)
+		Music_Seek("menu",38749);
 }
 
 #undef IsCurrentlyPlaying

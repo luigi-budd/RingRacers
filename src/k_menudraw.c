@@ -281,6 +281,13 @@ void M_UpdateMenuBGImage(boolean forceReset)
 	}
 }
 
+fixed_t M_GetBGSize(void)
+{
+	boolean greenres = ((vid.width % BASEVIDWIDTH == 0) && (vid.height % BASEVIDHEIGHT == 0));
+	fixed_t imageScale = greenres ? FRACUNIT : FixedDiv((vid.width / vid.dupx)*FRACUNIT, (vid.height / vid.dupy)*FRACUNIT);
+	return imageScale;
+}
+
 void M_DrawMenuBackground(void)
 {
 	patch_t *text1 = W_CachePatchName("MENUBGT1", PU_CACHE);
@@ -300,15 +307,8 @@ void M_DrawMenuBackground(void)
 		bgMapImage = W_CachePatchName("MENUBG4", PU_CACHE);
 	}
 
-	boolean greenres = ((vid.width % BASEVIDWIDTH == 0) && (vid.height % BASEVIDHEIGHT == 0));
-	fixed_t bgMapImageScale = greenres ? FRACUNIT : FixedDiv((vid.width / vid.dupx)*FRACUNIT, (vid.height / vid.dupy)*FRACUNIT);
+	fixed_t bgMapImageScale = M_GetBGSize();
 
-	/*
-	CONS_Printf("size inc: %f\n",
-		FIXED_TO_FLOAT(bgMapImageScale)
-	);
-	*/
-	
 	V_DrawFixedPatch(0, 0, 
 		bgMapImageScale, 
 		V_SNAPTOLEFT|V_SNAPTOTOP,
@@ -320,18 +320,21 @@ void M_DrawMenuBackground(void)
 	V_DrawFixedPatch(-bgImageScroll, 0, FRACUNIT, V_SNAPTOLEFT, W_CachePatchName("MENUBG1", PU_CACHE), NULL);
 	V_DrawFixedPatch(-bgImageScroll, 0, FRACUNIT, V_SNAPTOLEFT, W_CachePatchName(bgImageName, PU_CACHE), NULL);
 
-	V_DrawFixedPatch(0, (BASEVIDHEIGHT + 16) * FRACUNIT, FRACUNIT, V_SUBTRACT, W_CachePatchName("MENUBG2", PU_CACHE), NULL);
+	V_DrawFixedPatch(0, (BASEVIDHEIGHT + 16) * FRACUNIT, FRACUNIT, V_SUBTRACT|V_SNAPTOLEFT, W_CachePatchName("MENUBG2", PU_CACHE), NULL);
 
 	//we MIGHT need to draw another to get a clean loop on widescreen...
 	V_DrawFixedPatch(8 * FRACUNIT, -bgText1Scroll,
-		FRACUNIT, V_SUBTRACT, text1, NULL);
+		FRACUNIT, V_SUBTRACT|V_SNAPTOBOTTOM|V_SNAPTOLEFT, text1, NULL);
 	V_DrawFixedPatch(8 * FRACUNIT, -bgText1Scroll + text1loop,
-		FRACUNIT, V_SUBTRACT, text1, NULL);
+		FRACUNIT, V_SUBTRACT|V_SNAPTOBOTTOM|V_SNAPTOLEFT, text1, NULL);
 
-	V_DrawFixedPatch(-bgText2Scroll, (vid.height-8) * FRACUNIT,
-		FRACUNIT, V_ADD, text2, NULL);
-	V_DrawFixedPatch(-bgText2Scroll + text2loop, (vid.height-8) * FRACUNIT,
-		FRACUNIT, V_ADD, text2, NULL);
+	V_DrawFixedPatch(-bgText2Scroll - (text2loop), (BASEVIDHEIGHT-8) * FRACUNIT,
+		FRACUNIT, V_ADD|V_SNAPTOBOTTOM, text2, NULL);
+	V_DrawFixedPatch(-bgText2Scroll, (BASEVIDHEIGHT-8) * FRACUNIT,
+		FRACUNIT, V_ADD|V_SNAPTOBOTTOM, text2, NULL);
+	V_DrawFixedPatch(-bgText2Scroll + text2loop, (BASEVIDHEIGHT-8) * FRACUNIT,
+		FRACUNIT, V_ADD|V_SNAPTOBOTTOM, text2, NULL);
+
 
 	if (renderdeltatics > 2*FRACUNIT)
 		return; // wipe hitch...
@@ -342,7 +345,7 @@ void M_DrawMenuBackground(void)
 
 	bgText2Scroll += (MENUBG_TEXTSCROLL*renderdeltatics);
 	while (bgText2Scroll > text2loop)
-		bgText2Scroll -= text2loop;
+		bgText2Scroll -= (text2loop);
 
 	if (bgImageScroll > 0)
 	{
@@ -357,7 +360,7 @@ void M_DrawMenuBackground(void)
 void M_DrawExtrasBack(void)
 {
 	patch_t *bg = W_CachePatchName("M_XTRABG", PU_CACHE);
-	V_DrawFixedPatch(0, 0, FRACUNIT, 0, bg, NULL);
+	V_DrawFixedPatch(0, 0, M_GetBGSize(), V_SNAPTOLEFT|V_SNAPTOTOP, bg, NULL);
 }
 
 UINT16 M_GetCvPlayerColor(UINT8 pnum)
@@ -3317,7 +3320,7 @@ void M_DrawCupSelect(void)
 	}
 
 	INT16 ty = M_EaseWithTransition(Easing_Linear, 5 * 24);
-	V_DrawFill(0, 146 + ty, BASEVIDWIDTH, 54, 31|V_SNAPTOBOTTOM);
+	V_DrawFill(0, 146 + ty, vid.width, 54, 31|V_SNAPTOBOTTOM|V_SNAPTOLEFT);
 	M_DrawCupPreview(146 + ty, &templevelsearch);
 
 	M_DrawCupTitle(120 - ty, &templevelsearch, V_SNAPTOBOTTOM);
@@ -4370,14 +4373,14 @@ void M_DrawOptionsCogs(void)
 		if (optionsmenu.fade)
 		{
 			c2 = R_GetTranslationColormap(TC_DEFAULT, optionsmenu.lastcolour, GTC_CACHE);
-			V_DrawFixedPatch(0, 0, FRACUNIT, 0, back, c2);
+			V_DrawFixedPatch(0, 0, M_GetBGSize(), V_SNAPTOLEFT|V_SNAPTOTOP, back, c2);
 
 			// prepare fade flag:
 			tflag = min(V_90TRANS, (optionsmenu.fade)<<V_ALPHASHIFT);
 
 		}
 		c = R_GetTranslationColormap(TC_DEFAULT, optionsmenu.currcolour, GTC_CACHE);
-		V_DrawFixedPatch(0, 0, FRACUNIT, tflag, back, c);
+		V_DrawFixedPatch(0, 0, M_GetBGSize(), tflag|V_SNAPTOLEFT|V_SNAPTOTOP, back, c);
 	}
 	else
 	{
@@ -4386,12 +4389,22 @@ void M_DrawOptionsCogs(void)
 			M_DrawEggaChannelAlignable(true);
 		}
 
-		patch_t *back_pause = W_CachePatchName(va("OPT_BAK%u", tick), PU_CACHE);
-		V_DrawFixedPatch(0, 0, FRACUNIT, V_MODULATE, back_pause, NULL);
+		//Left
+		patch_t *back_pause = W_CachePatchName(va("OPT_BK%uL", tick), PU_CACHE);
+		V_DrawFixedPatch(0, 0, FRACUNIT, V_MODULATE|V_SNAPTOLEFT|V_SNAPTOBOTTOM, back_pause, NULL);
 
 		if (!solidbg)
 		{
-			V_DrawFixedPatch(0, 0, FRACUNIT, (V_ADD|V_70TRANS), back_pause, NULL);
+			V_DrawFixedPatch(0, 0, FRACUNIT, (V_ADD|V_70TRANS)|V_SNAPTOLEFT|V_SNAPTOBOTTOM, back_pause, NULL);
+		}
+
+		//Right
+		patch_t *back_pauseRight = W_CachePatchName(va("OPT_BK%uR", tick), PU_CACHE);
+		V_DrawFixedPatch(0, 0, FRACUNIT, V_MODULATE|V_SNAPTORIGHT|V_SNAPTOTOP, back_pauseRight, NULL);
+
+		if (!solidbg)
+		{
+			V_DrawFixedPatch(0, 0, FRACUNIT, (V_ADD|V_70TRANS)|V_SNAPTORIGHT|V_SNAPTOTOP, back_pauseRight, NULL);
 		}
 	}
 }
@@ -6108,13 +6121,13 @@ void M_DrawPause(void)
 			}
 		}
 
-		V_DrawCenteredMenuString(24, 167 + offset/2, V_YELLOWMAP|V_SNAPTOLEFT, M_GetGameplayMode());
+		V_DrawCenteredMenuString(24, 167 + offset/2, V_YELLOWMAP|V_SNAPTOLEFT|V_SNAPTOBOTTOM, M_GetGameplayMode());
 
 		Y_RoundQueueDrawer(&standings, offset/2, false, false);
 	}
 	else
 	{
-		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP, M_GetGameplayMode());
+		V_DrawMenuString(4, 188 + offset/2, V_YELLOWMAP|V_SNAPTOBOTTOM, M_GetGameplayMode());
 	}
 }
 
@@ -7449,7 +7462,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 	K_drawButton(
 		24 << FRACBITS,
 		16 << FRACBITS,
-		V_SNAPTOBOTTOM, kp_button_c[1],
+		V_SNAPTOLEFT, kp_button_c[1],
 		keybuttonpress
 	);
 
@@ -7468,9 +7481,9 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 		}
 
 		if (offs > 0)
-			V_DrawFill(1+2, keybary, offs, 1, 0|V_SNAPTOBOTTOM);
+			V_DrawFill(1+2, keybary, offs, 1, 0|V_SNAPTOLEFT);
 		if (offs < keybarlen)
-			V_DrawFadeFill(1+2+offs, keybary, keybarlen-offs, 1, V_SNAPTOBOTTOM, 31, challengetransparentstrength);
+			V_DrawFadeFill(1+2+offs, keybary, keybarlen-offs, 1, V_SNAPTOLEFT, 31, challengetransparentstrength);
 	}
 
 	// Counter
@@ -7484,14 +7497,14 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 		numbers[3] = ((gamedata->chaokeys / 1000) % 10);
 		if (numbers[3] != 0)
 		{
-			V_DrawScaledPatch(textx - 4, texty, V_SNAPTOBOTTOM, kp_facenum[numbers[3]]);
+			V_DrawScaledPatch(textx - 4, texty, V_SNAPTOLEFT, kp_facenum[numbers[3]]);
 			textx += 2;
 		}
 
 		UINT8 i = 0;
 		while (i < 3)
 		{
-			V_DrawScaledPatch(textx, texty, V_SNAPTOBOTTOM, kp_facenum[numbers[i]]);
+			V_DrawScaledPatch(textx, texty, V_SNAPTOLEFT, kp_facenum[numbers[i]]);
 			textx += 6;
 			i++;
 		}
@@ -7507,7 +7520,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 			handx -= (skullAnimCounter/5);
 		}
 
-		V_DrawScaledPatch(handx, 8, V_FLIP|V_SNAPTOBOTTOM,
+		V_DrawScaledPatch(handx, 8, V_FLIP|V_SNAPTOLEFT,
 			W_CachePatchName("M_CURSOR", PU_CACHE));
 	}
 
@@ -7575,7 +7588,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 					{
 						INT32 time = (major ? 5 : 3) - (keyholdrotation - 1) / (90 * FRACUNIT);
 						if (time <= 5 && time >= 0)
-							V_DrawScaledPatch(tilex + 2, tiley - 2, V_SNAPTOBOTTOM, kp_eggnum[time]);
+							V_DrawScaledPatch(tilex + 2, tiley - 2, V_SNAPTOLEFT, kp_eggnum[time]);
 					}
 				}
 
@@ -7593,7 +7606,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 				thiskeyy -= FixedMul(radius, FINECOSINE(ang));
 			}
 
-			V_DrawFixedPatch(thiskeyx, thiskeyy, FRACUNIT, V_SNAPTOBOTTOM, key, NULL);
+			V_DrawFixedPatch(thiskeyx, thiskeyy, FRACUNIT, V_SNAPTOLEFT, key, NULL);
 		}
 	}
 
@@ -7607,7 +7620,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 			lastkeycolormap = R_GetTranslationColormap(TC_BLINK, SKINCOLOR_BLACK, GTC_MENUCACHE);
 		}
 
-		V_DrawFixedPatch(keyx, keyy, FRACUNIT, V_SNAPTOBOTTOM, key, lastkeycolormap);
+		V_DrawFixedPatch(keyx, keyy, FRACUNIT, V_SNAPTOLEFT, key, lastkeycolormap);
 
 		// Extra glowverlay if you can use a Chao Key
 		if (keysbeingused == 0 && M_CanKeyHiliTile())
@@ -7620,7 +7633,7 @@ static void M_DrawChallengeKeys(INT32 tilex, INT32 tiley)
 					: (10 - trans)
 				) << V_ALPHASHIFT;
 
-				V_DrawFixedPatch(keyx, keyy, FRACUNIT, trans|V_SNAPTOBOTTOM, key,
+				V_DrawFixedPatch(keyx, keyy, FRACUNIT, trans|V_SNAPTOLEFT, key,
 					R_GetTranslationColormap(TC_ALLWHITE, 0, GTC_MENUCACHE)
 				);
 			}
@@ -7911,8 +7924,8 @@ challengedesc:
 		V_DrawFill(0, endy, endlen, 11, 24|V_SNAPTOLEFT);
 		V_DrawFixedPatch(endlen*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_FLIP|V_SNAPTOLEFT, endwing, NULL);
 
-		V_DrawFill(BASEVIDWIDTH - endlen, endy, endlen, 11, 24|V_SNAPTOLEFT);
-		V_DrawFixedPatch((BASEVIDWIDTH - endlen)*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_SNAPTOLEFT, endwing, NULL);
+		V_DrawFill(BASEVIDWIDTH - endlen, endy, endlen, 11, 24|V_SNAPTORIGHT);
+		V_DrawFixedPatch((BASEVIDWIDTH - endlen)*FRACUNIT, endy*FRACUNIT, FRACUNIT, V_SNAPTORIGHT, endwing, NULL);
 	}
 
 	// Percentage

@@ -545,7 +545,7 @@ void MasterClient_Ticker(void);
 consvar_t cv_masterserver_update_rate = Server("masterserver_update_rate", "15").min_max(2, 60).onchange_noinit(MasterClient_Ticker);
 
 consvar_t cv_maxping = Server("maxdelay", "20").min_max(0, 30);
-consvar_t cv_menujam = Server("menujam", "menu").values({{0, "menu"}, {1, "menu2"}, {2, "menu3"}});
+consvar_t cv_menujam = Server("menujam", "_title").values({{0, "menu"}, {1, "menu2"}, {2, "menu3"}, {3, "_title"}});
 consvar_t cv_menujam_update = Server("menujam_update", "Off").on_off();
 consvar_t cv_netdemosyncquality = Server("netdemo_syncquality", "1").min_max(1, 35);
 consvar_t cv_netdemosize = Server("netdemo_size", "6").values(CV_Natural);
@@ -568,6 +568,8 @@ consvar_t cv_recordmultiplayerdemos = Server("netdemo_record", kNetDemoRecordDef
 
 consvar_t cv_reducevfx = Server("reducevfx", "No").yes_no();
 consvar_t cv_screenshake = Server("screenshake", "Full").values({{0, "Off"}, {1, "Half"}, {2, "Full"}});
+
+consvar_t cv_musicsynch = Server("musicsynch", "Podium Only").values({{0, "Never"}, {1, "Podium Only"}, {2, "Always"}});
 
 consvar_t cv_rendezvousserver = Server("holepunchserver", "relay.kartkrew.org");
 
