@@ -1,3 +1,15 @@
+Edit by luigi budd to include multiple stuff
+- (WIP) Localskin: From SRB2Saturn, allows players to choose their own skin to show on their screen without affecting stats and stuff like that
+- Local files: Locally adds files, such as graphics replacements or simple hud luas, without needing admin permissions or permission from the server
+- (WIP) Widescreen menus: Menu screens and pause menus are all non-green-res compatible!
+- And more i havent listed yet lol
+Requires luigibudd.pk3 to be in RingRacers/data for graphics replacements
+
+TODO:
+- Add enhancements from NepDisk's Noire RR
+- Rename luigibudd.pk3? Maybe this repo could have its own name, like SRB2Saturn or Noire does so it doesnt have to use my name lol
+- More stuff needs to have toggles (Spectator race mus, um idk lol)
+
 # Dr. Robotnik's Ring Racers
 
 <p align="center">
