@@ -3,6 +3,7 @@ Edit by luigi budd to include multiple stuff
 - Local files: Locally adds files, such as graphics replacements or simple hud luas, without needing admin permissions or permission from the server
 - (WIP) Widescreen menus: Menu screens and pause menus are all non-green-res compatible!
 - And more i havent listed yet lol
+
 Requires luigibudd.pk3 to be in RingRacers/data for graphics replacements
 
 TODO:
