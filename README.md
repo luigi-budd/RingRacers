@@ -10,6 +10,8 @@ TODO:
 - Add enhancements from NepDisk's Noire RR
 - Rename luigibudd.pk3? Maybe this repo could have its own name, like SRB2Saturn or Noire does so it doesnt have to use my name lol
 - More stuff needs to have toggles (Spectator race mus, um idk lol)
+- Add optional music synching
+- There are some cases where regular skin grid would draw the blue grid
 
 # Dr. Robotnik's Ring Racers
 

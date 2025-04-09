@@ -9335,24 +9335,27 @@ UINT16 P_PartialAddWadFile(const char *wadfilename, boolean local)
 //	UINT16 mapPos, mapNum = 0;
 
 	// Init file.
-	if ((numlumps = W_InitFile(wadfilename, false, false)) == INT16_MAX)
+	if ((numlumps = W_InitFile(wadfilename, false, false, local)) == INT16_MAX)
 	{
 		refreshdirmenu |= REFRESHDIR_NOTLOADED;
 		return false;
 	}
 
-	wadfiles[wadnum]->localfile = local;
 	wadnum = (UINT16)(numwadfiles-1);
-
-	// Local addons should never be marked important, as we dont want them in our demos
-	if (local)
-		wadfiles[wadnum]->important = false;
 
 	// Init partadd.
 	if (wadfiles[wadnum]->important)
 	{
 		partadd_important = true;
 	}
+
+	// Local addons should never be marked important, as we dont want them in our demos
+	if (local)
+    {
+		wadfiles[wadnum]->important = false;
+        partadd_important = false;
+    }
+
 	if (partadd_stage != 0)
 	{
 		partadd_earliestfile = wadnum;

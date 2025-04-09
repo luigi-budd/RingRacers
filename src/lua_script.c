@@ -546,6 +546,7 @@ void LUA_ClearExtVars(void)
 // if they were not called on lump load
 // (i.e. they were called in hooks or coroutines etc)
 INT32 lua_lumploading = 0;
+INT32 lua_localloading = 0;
 
 // Load a script from a MYFILE
 static inline void LUA_LoadFile(MYFILE *f, char *name, boolean noresults)
@@ -611,7 +612,8 @@ void LUA_LoadLump(UINT16 wad, UINT16 lump, boolean noresults)
 	LUA_LoadFile(&f, name, noresults); // actually load file!
 
 	// Okay, we've modified the game beyond the point of no return.
-	G_SetGameModified(multiplayer, true);
+    if (!lua_localloading)
+	    G_SetGameModified(multiplayer, true);
 
 	free(name);
 	Z_Free(f.data);

@@ -780,7 +780,7 @@ static UINT16 W_InitFileError (const char *filename, boolean exitworthy)
 //
 // Can now load dehacked files (.soc)
 //
-UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
+UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup, boolean local)
 {
 	FILE *handle;
 	lumpinfo_t *lumpinfo = NULL;
@@ -830,6 +830,8 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	}
 
 	important = !important;
+    if (local)
+        important = 0;
 
 #ifndef NOMD5
 	//
@@ -883,7 +885,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 		return W_InitFileError(filename, startup);
 	}
 
-	if (important && !mainfile)
+	if (important && !mainfile && !local)
 	{
 		//G_SetGameModified(true);
 		modifiedgame = true; // avoid savemoddata being set to false
@@ -902,6 +904,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	fseek(handle, 0, SEEK_END);
 	wadfile->filesize = (unsigned)ftell(handle);
 	wadfile->type = type;
+    wadfile->localfile = local;
 
 	// already generated, just copy it over
 	M_Memcpy(&wadfile->md5sum, &md5sum, 16);
@@ -918,7 +921,9 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	CONS_Printf(M_GetText("Added file %s (%u lumps)\n"), filename, numlumps);
 	wadfiles[numwadfiles] = wadfile;
 	numwadfiles++; // must come BEFORE W_LoadDehackedLumps, so any addfile called by COM_BufInsertText called by Lua doesn't overwrite what we just loaded
-
+    if (local)
+        lua_localloading = 1;
+    
 #ifdef HWRENDER
 	// Read shaders from file
 	if (rendermode == render_opengl && (vid.glstate == VID_GL_LIBRARY_LOADED))
@@ -955,6 +960,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	DEH_UpdateMaxFreeslots();
 
 	W_InvalidateLumpnumCache();
+    lua_localloading = 0;
 	return wadfile->numlumps;
 }
 
@@ -979,7 +985,7 @@ INT32 W_InitMultipleFiles(char **filenames, boolean addons)
 			G_SetGameModified(true, false);
 
 		//CONS_Debug(DBG_SETUP, "Loading %s\n", *filenames);
-		rc = W_InitFile(*filenames, !addons, true);
+		rc = W_InitFile(*filenames, !addons, true, false);
 		if (rc == INT16_MAX)
 			CONS_Printf(M_GetText("Errors occurred while loading %s; not added.\n"), *filenames);
 		overallrc &= (rc != INT16_MAX) ? 1 : 0;
