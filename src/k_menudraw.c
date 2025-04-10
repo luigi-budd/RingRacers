@@ -977,6 +977,13 @@ void M_Drawer(void)
 	// background layer
 	if (menuactive)
 	{
+		// this goes here instead, so if we get any HOM, this can cover it up
+        if ((gamestate == GS_MENU) &&
+			((vid.width % BASEVIDWIDTH != 0) || (vid.height % BASEVIDHEIGHT != 0)))
+		{
+			V_DrawFixedPatch(0, 0, FRACUNIT, 0, W_CachePatchName("WEIRDRES", PU_CACHE), NULL);
+		}
+
 		boolean drawbgroutine = false;
 		boolean trulystarted = M_GameTrulyStarted();
 
@@ -4373,14 +4380,14 @@ void M_DrawOptionsCogs(void)
 		if (optionsmenu.fade)
 		{
 			c2 = R_GetTranslationColormap(TC_DEFAULT, optionsmenu.lastcolour, GTC_CACHE);
-			V_DrawFixedPatch(0, 0, M_GetBGSize(), V_SNAPTOLEFT|V_SNAPTOTOP, back, c2);
+			V_DrawFixedPatch(0, 0, FRACUNIT, 0, back, c2);
 
 			// prepare fade flag:
 			tflag = min(V_90TRANS, (optionsmenu.fade)<<V_ALPHASHIFT);
 
 		}
 		c = R_GetTranslationColormap(TC_DEFAULT, optionsmenu.currcolour, GTC_CACHE);
-		V_DrawFixedPatch(0, 0, M_GetBGSize(), tflag|V_SNAPTOLEFT|V_SNAPTOTOP, back, c);
+		V_DrawFixedPatch(0, 0, FRACUNIT, tflag, back, c);
 	}
 	else
 	{
