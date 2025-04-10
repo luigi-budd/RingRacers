@@ -1543,6 +1543,7 @@ void M_CharacterSelectTick(void)
 
 boolean M_CharacterSelectQuit(void)
 {
+    PLAY_CharSelectDef.extra2 = 0;
 	return true;
 }
 
