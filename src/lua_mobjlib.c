@@ -342,9 +342,11 @@ static int mobj_get(lua_State *L)
 	case mobj_skin: // skin name or nil, not struct
 		if (!mo->skin)
 			return 0;
+#if 0
 		if (mo->localskin)
 			lua_pushstring(L, ((skin_t *)mo->localskin)->name);
 		else
+#endif
 			lua_pushstring(L, ((skin_t *)mo->skin)->name);
 		
 		break;
@@ -734,6 +736,8 @@ static int mobj_set(lua_State *L)
 
 			return 0;
 		}
+// "lua immersion", see also: mobj_get::case mobj_skin
+#if 0
 		else {
 			skin = R_LocalSkinAvailable(name, true);
 			if (!mo->player || R_SkinUsable(mo->player-players, skin, false))
@@ -748,6 +752,7 @@ static int mobj_set(lua_State *L)
 
 			return 0;
 		}
+#endif
 		return luaL_error(L, "mobj.skin '%s' not found!", skin);
 	}
 	case mobj_color:
