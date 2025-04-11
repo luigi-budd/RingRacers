@@ -2527,7 +2527,17 @@ void PositionFacesInfo::draw_1p()
 
 		if (players[rankplayer[i]].mo->color)
 		{
-			if ((skin_t*)players[rankplayer[i]].mo->skin)
+            boolean iwaslocal = false;
+            if ((skin_t *)players[rankplayer[i]].mo->localskin)
+                if (players[rankplayer[i]].mo->skinlocal)
+                {
+                    workingskin = (skin_t*)players[rankplayer[i]].mo->localskin - localskins;
+                    iwaslocal = true;
+                }
+                else
+                    workingskin = (skin_t*)players[rankplayer[i]].mo->localskin - skins;
+                
+			else if ((skin_t*)players[rankplayer[i]].mo->skin)
 				workingskin = (skin_t*)players[rankplayer[i]].mo->skin - skins;
 			else
 				workingskin = players[rankplayer[i]].skin;
@@ -2544,7 +2554,7 @@ void PositionFacesInfo::draw_1p()
 				(Y + yoff)<<FRACBITS,
 				FRACUNIT >> 1,
 				V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag,
-				faceprefix[workingskin][FACE_WANTED], colormap
+				(iwaslocal ? localfaceprefix : faceprefix)[workingskin][FACE_WANTED], colormap
 			);
 			//(x)<<FRACBITS, (y)<<FRACBITS, FRACUNIT, s, p, c)
 
@@ -3167,8 +3177,20 @@ static void K_drawRingCounter(boolean gametypeinfoshown)
 		if (uselives)
 		{
 			UINT8 *colormap = R_GetTranslationColormap(stplyr->skin, static_cast<skincolornum_t>(stplyr->skincolor), GTC_CACHE);
-			V_DrawMappedPatch(LAPS_X+46, fy-5, V_HUDTRANS|V_SLIDEIN|splitflags, faceprefix[stplyr->skin][FACE_RANK], colormap);
-			SINT8 livescount = 0;
+			
+            boolean yeahimlocal = false;
+            int skin = stplyr->skin;
+            if (stplyr->localskin)
+            {
+                if (stplyr->skinlocal)
+                    yeahimlocal = true;
+                skin = stplyr->localskin - 1;
+            }
+
+            V_DrawMappedPatch(LAPS_X+46, fy-5, V_HUDTRANS|V_SLIDEIN|splitflags,
+                (yeahimlocal ? localfaceprefix : faceprefix)[skin][FACE_RANK], colormap);
+			
+            SINT8 livescount = 0;
 			if (stplyr->lives > 0)
 			{
 				livescount = stplyr->lives;
@@ -4709,9 +4731,19 @@ static void K_drawKartMinimap(void)
 			}
 			else
 			{
-				skin = ((skin_t*)mobj->skin)-skins;
+                boolean imlocal = false;
+				if (mobj->localskin)
+                    if (mobj->skinlocal)
+                    {
+                        skin = ((skin_t*)mobj->localskin)-localskins;
+                        imlocal = true;
+                    } else {
+                        skin = ((skin_t*)mobj->localskin)-skins;
+                    }
+                else
+                    skin = ((skin_t*)mobj->skin)-skins;
 
-				workingPic = R_CanShowSkinInDemo(skin) ? faceprefix[skin][FACE_MINIMAP] : kp_unknownminimap;
+				workingPic = R_CanShowSkinInDemo(skin) ? (imlocal ? localfaceprefix : faceprefix)[skin][FACE_MINIMAP] : kp_unknownminimap;
 
 				if (mobj->color)
 				{
@@ -4909,9 +4941,19 @@ static void K_drawKartMinimap(void)
 		}
 		else
 		{
-			skin = ((skin_t*)mobj->skin)-skins;
+            boolean imlocal = false;
+            if (mobj->localskin)
+                if (mobj->skinlocal)
+                {
+                    skin = ((skin_t*)mobj->localskin)-localskins;
+                    imlocal = true;
+                } else {
+                    skin = ((skin_t*)mobj->localskin)-skins;
+                }
+            else
+                skin = ((skin_t*)mobj->skin)-skins;
 
-			workingPic = R_CanShowSkinInDemo(skin) ? faceprefix[skin][FACE_MINIMAP] : kp_unknownminimap;
+			workingPic = R_CanShowSkinInDemo(skin) ? (imlocal ? localfaceprefix : faceprefix)[skin][FACE_MINIMAP] : kp_unknownminimap;
 
 			if (mobj->color)
 			{
