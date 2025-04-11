@@ -259,12 +259,31 @@ static void M_SetupProfileGridPos(setup_player_t *p)
 
 static void M_SetupMidGameGridPos(setup_player_t *p, UINT8 num)
 {
-	INT32 i = R_SkinAvailableEx(cv_skin[num].zstring, false);
+    char *skinzstring = cv_skin[num].zstring;
+    boolean local = (PLAY_CharSelectDef.extra2 == 1);
+	INT32 i = R_SkinAvailableEx(local ? cv_localskin.zstring : skinzstring, false);
 	INT32 alt = 0;	// Hey it's my character's name!
+    skin_t *myskins = (local ? localskins : skins);
 
+    boolean checklocalskin = false;
 	if (i == -1)
-		i = 0;
-
+    {
+        // If there's no localskin set, use our regular skin
+        if (local)
+            i = R_SkinAvailableEx(skinzstring, false);
+            checklocalskin = true;
+            
+            //epic fail
+            if (i == -1) { i = 0; myskins = skins; }
+        //c has killed me
+        else if (i == -1) {
+            i = 0;
+        }
+    }
+    //use regular skins if this is a regular skin
+    if (local && (players[num].localskin && !players[num].skinlocal))
+        myskins = skins;
+    
 	// While we're here, read follower values.
 	p->followern = cv_follower[num].value;
 	p->followercolor = cv_followercolor[num].value;
@@ -274,8 +293,8 @@ static void M_SetupMidGameGridPos(setup_player_t *p, UINT8 num)
 		p->followern = -1;
 
 	// Now position the grid for skin
-	p->gridx = skins[i].kartspeed-1;
-	p->gridy = skins[i].kartweight-1;
+	p->gridx = myskins[i].kartspeed-1;
+	p->gridy = myskins[i].kartweight-1;
 
 	// Now this put our cursor on the good alt
 	while (alt < setup_chargrid[p->gridx][p->gridy].numskins && setup_chargrid[p->gridx][p->gridy].skinlist[alt] != i)
@@ -283,6 +302,25 @@ static void M_SetupMidGameGridPos(setup_player_t *p, UINT8 num)
 
 	p->clonenum = alt;
 	p->color = cv_playercolor[num].value;
+
+    if (checklocalskin)
+    {
+        //this skin ISNT local, so refresh our cursor
+        if (!setup_chargrid[p->gridx][p->gridy].skinlocal[p->clonenum])
+        {
+            myskins = skins;
+
+            p->gridx = myskins[i].kartspeed-1;
+            p->gridy = myskins[i].kartweight-1;
+
+            while (alt < setup_chargrid[p->gridx][p->gridy].numskins && setup_chargrid[p->gridx][p->gridy].skinlist[alt] != i)
+                alt++;
+
+            p->clonenum = alt;
+        }
+
+    }
+
 	return;	// we're done here
 }
 
@@ -366,7 +404,9 @@ void M_CharacterSelectInit(void)
 		}
 	}
 
-	{
+    //dont add the localskins, so the regular statgraph cant select them
+	if (PLAY_CharSelectDef.extra2 == 1)
+    {
 		for (i = 0; i < numlocalskins; i++)
 		{
 			UINT8 x = localskins[i].kartspeed-1;
@@ -1429,10 +1469,19 @@ static void M_MPConfirmCharacterSelection(void)
 			CV_StealthSet(&cv_skin[i], skins[setup_player[i].skin].name);
 		else
 		{
-			//TODO: splitscreen
-			CV_StealthSet(&cv_localskin, (setup_player[i].localskin ? localskins : skins)[setup_player[i].skin].name);
-			SetLocalPlayerSkin(consoleplayer, (setup_player[i].localskin ? localskins : skins)[setup_player[i].skin].name, &cv_localskin);
-		}
+            //if we selected our normal skin, remove the local one
+            if (!strcasecmp(cv_skin[i].string, (setup_player[i].localskin ? localskins : skins)[setup_player[i].skin].name))
+            {
+                CV_StealthSet(&cv_localskin, "None");
+                SetLocalPlayerSkin(consoleplayer, "none", &cv_localskin);
+            }
+            else
+            {
+                //TODO: splitscreen
+                CV_StealthSet(&cv_localskin, (setup_player[i].localskin ? localskins : skins)[setup_player[i].skin].name);
+                SetLocalPlayerSkin(consoleplayer, (setup_player[i].localskin ? localskins : skins)[setup_player[i].skin].name, &cv_localskin);
+            }
+        }
 
 		//Only set localskin while in localskin chooser
 		if (PLAY_CharSelectDef.extra2 == 0)

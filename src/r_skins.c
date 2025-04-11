@@ -409,6 +409,18 @@ INT32 R_SkinAvailableEx(const char *name, boolean demoskins)
 
 		return i;
 	}
+    
+	for (i = 0; i < numlocalskins; i++)
+	{
+		if (localskins[i].namehash != hash)
+			continue;
+
+		if (stricmp(localskins[i].name,name)!=0)
+			continue;
+
+		return i;
+	}
+
 	return -1;
 }
 

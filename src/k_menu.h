@@ -818,6 +818,7 @@ struct setup_player_t
 	UINT8 profilen;
 	menu_anim_t profilen_slide;
 	INT16 skin;
+    //is this skin local to our client (ie, added thru local addon)
 	boolean localskin;
 	SINT8 clonenum;
 	SINT8 rotate;
