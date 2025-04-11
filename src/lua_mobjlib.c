@@ -63,6 +63,8 @@ enum mobj_e {
 	mobj_eflags,
 	mobj_renderflags,
 	mobj_skin,
+    mobj_localskin,
+    mobj_skinlocal,
 	mobj_color,
 	mobj_bnext,
 	mobj_bprev,
@@ -153,6 +155,8 @@ static const char *const mobj_opt[] = {
 	"eflags",
 	"renderflags",
 	"skin",
+    "localskin",
+    "skinlocal",
 	"color",
 	"bnext",
 	"bprev",
@@ -342,15 +346,19 @@ static int mobj_get(lua_State *L)
 	case mobj_skin: // skin name or nil, not struct
 		if (!mo->skin)
 			return 0;
-#if 0
-		if (mo->localskin)
-			lua_pushstring(L, ((skin_t *)mo->localskin)->name);
-		else
-#endif
-			lua_pushstring(L, ((skin_t *)mo->skin)->name);
-		
+        
+        lua_pushstring(L, ((skin_t *)mo->skin)->name);
 		break;
-	case mobj_color:
+	case mobj_localskin: // localskin name or nil, not struct
+		if (!mo->localskin)
+			return 0;
+        
+        lua_pushstring(L, ((skin_t *)mo->localskin)->name);
+		break;
+    case mobj_skinlocal:
+        lua_pushboolean(L, mo->skinlocal);
+		break;
+    case mobj_color:
 		lua_pushinteger(L, mo->color);
 		break;
 	case mobj_bnext:
@@ -736,25 +744,49 @@ static int mobj_set(lua_State *L)
 
 			return 0;
 		}
-// "lua immersion", see also: mobj_get::case mobj_skin
-#if 0
-		else {
-			skin = R_LocalSkinAvailable(name, true);
-			if (!mo->player || R_SkinUsable(mo->player-players, skin, false))
-			{
-				if (demo.playback)
-					skin = demo.skinlist[skin].mapping;
-				// set something here for localskin
-				mo->skin = &localskins[skin];
-				mo->localskin = &localskins[skin];
-				mo->skinlocal = (&localskins[skin])->localskin;
-			}
-
-			return 0;
-		}
-#endif
 		return luaL_error(L, "mobj.skin '%s' not found!", skin);
 	}
+    case mobj_localskin:
+    {
+ 		const char *name = luaL_checkstring(L, 3);
+		INT32 skin = R_SkinAvailable(name);
+
+        //set the localskin
+ 		if (strcasecmp(name, "none") && (skin != -1))
+		{
+            INT32 i;
+            for (i = 0; i < numlocalskins; i++)
+            {
+                // search in the skin list
+                if (stricmp(localskins[i].name, name) == 0)
+                {
+                    mo->localskin = &localskins[i];
+                    mo->skinlocal = true;
+                    return 0;
+                }
+            }
+            for (i = 0; i < numskins; i++)
+            {
+                // search in the skin list
+                if (stricmp(skins[i].name, name) == 0)
+                {
+                    mo->localskin = &skins[i];
+                    mo->skinlocal = false;
+                    return 0;
+                }
+            }
+
+            return 0;
+        }
+        //if "none", or the skin doesnt exist, remove the localskin
+        else
+        {
+			mo->localskin = 0;
+			mo->skinlocal = false;
+        }
+
+        return 0;
+    }
 	case mobj_color:
 	{
 		UINT16 newcolor = (UINT16)luaL_checkinteger(L,3);

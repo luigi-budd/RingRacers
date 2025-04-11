@@ -18,6 +18,7 @@
 #include "g_game.h"
 #include "p_local.h"
 #include "d_clisrv.h"
+#include "r_skins.h" //SetLocalPlayerSkin
 
 #include "lua_script.h"
 #include "lua_libs.h"
@@ -518,6 +519,10 @@ static int player_get(lua_State *L)
 		lua_pushinteger(L, plr->fakeskin);
 	else if (fastcmp(field,"lastfakeskin"))
 		lua_pushinteger(L, plr->lastfakeskin);
+    else if (fastcmp(field,"localskin"))
+        lua_pushinteger(L, plr->localskin);
+    else if (fastcmp(field,"skinlocal"))
+        lua_pushboolean(L, plr->skinlocal);
 	else if (fastcmp(field,"score"))
 		lua_pushinteger(L, plr->score);
 	// SRB2kart
@@ -777,6 +782,10 @@ static int player_set(lua_State *L)
 		return NOSET;
 	else if (fastcmp(field,"lastfakeskin"))
 		return NOSET;
+    else if (fastcmp(field,"localskin"))
+        SetLocalPlayerSkin((int)plr, luaL_optstring(L, 2, "none"), NULL);
+    else if (fastcmp(field,"skinlocal"))
+        return NOSET;
 	else if (fastcmp(field,"score"))
 		plr->score = luaL_checkinteger(L, 3);
 	// SRB2kart
