@@ -1506,9 +1506,15 @@ static void R_ProjectDropShadow(
 	shadow->gzt = groundz + patch->height * shadowyscale / 2;
 	shadow->gz = shadow->gzt - patch->height * shadowyscale;
 	shadow->texturemid = FixedMul(interp.scale, FixedDiv(shadow->gzt - viewz, shadowyscale));
-	if (thing->skin && ((skin_t *)thing->skin)->highresscale != FRACUNIT)
-		shadow->texturemid = FixedMul(shadow->texturemid, ((skin_t *)thing->skin)->highresscale);
-	shadow->scalestep = 0;
+	
+    skin_t *work_skin = NULL;
+    if (R_MobjHasAnySkin(thing))
+        work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
+    
+    if (work_skin && work_skin->highresscale != FRACUNIT)
+		shadow->texturemid = FixedMul(shadow->texturemid, work_skin->highresscale);
+	
+    shadow->scalestep = 0;
 	shadow->shear.tan = shadowskew; // repurposed variable
 
 	shadow->mobj = thing; // Easy access! Tails 06-07-2002
@@ -1722,6 +1728,10 @@ static void R_ProjectSprite(mobj_t *thing)
 	fixed_t sortscale, sortsplat = 0;
 	fixed_t sort_x = 0, sort_y = 0, sort_z;
 
+    skin_t *work_skin = NULL;
+    if (R_MobjHasAnySkin(thing))
+        work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
+    
 	INT32 x1, x2;
 	INT32 x1test = 0, x2test = 0;
 
@@ -1798,7 +1808,9 @@ static void R_ProjectSprite(mobj_t *thing)
 	}
 
 	this_scale = interp.scale;
-
+	if (work_skin && work_skin->highresscale != FRACUNIT)
+		this_scale = FixedMul(this_scale, work_skin->highresscale);
+	
 	// hitlag vibrating (todo: interp somehow?)
 	if (thing->hitlag > 0 && (thing->eflags & MFE_DAMAGEHITLAG))
 	{
@@ -1849,14 +1861,14 @@ static void R_ProjectSprite(mobj_t *thing)
 	frame = thing->frame&FF_FRAMEMASK;
 
 	//Fab : 02-08-98: 'skin' override spritedef currently used for skin
-	if ((thing->skin || thing->localskin) && thing->sprite == SPR_PLAY)
+	if (R_MobjHasAnySkin(thing) && thing->sprite == SPR_PLAY)
 	{
-		sprdef = &((skin_t *)( (thing->localskin) ? thing->localskin : thing->skin ))->sprites[thing->sprite2];
+		sprdef = &work_skin->sprites[thing->sprite2];
 #ifdef ROTSPRITE
-		sprinfo = &((skin_t *)( (thing->localskin) ? thing->localskin : thing->skin ))->sprinfo[thing->sprite2];
+		sprinfo = &work_skin->sprinfo[thing->sprite2];
 #endif
 		if (frame >= sprdef->numframes) {
-			CONS_Alert(CONS_ERROR, M_GetText("R_ProjectSprite: invalid skins[\"%s\"].sprites[%sSPR2_%s] frame %s\n"), ((skin_t *)thing->skin)->name, ((thing->sprite2 & FF_SPR2SUPER) ? "FF_SPR2SUPER|": ""), spr2names[(thing->sprite2 & ~FF_SPR2SUPER)], sizeu5(frame));
+			CONS_Alert(CONS_ERROR, M_GetText("R_ProjectSprite: invalid skins[\"%s\"].sprites[%sSPR2_%s] frame %s\n"), work_skin->name, ((thing->sprite2 & FF_SPR2SUPER) ? "FF_SPR2SUPER|": ""), spr2names[(thing->sprite2 & ~FF_SPR2SUPER)], sizeu5(frame));
 			thing->sprite = states[S_UNKNOWN].sprite;
 			thing->frame = states[S_UNKNOWN].frame;
 			sprdef = &sprites[thing->sprite];
@@ -1938,11 +1950,6 @@ static void R_ProjectSprite(mobj_t *thing)
 	}
 
 	I_Assert(lump < max_spritelumps);
-
-	if (thing->localskin && ((skin_t *)thing->localskin)->highresscale != FRACUNIT)
-		this_scale = FixedMul(this_scale, ((skin_t *)thing->localskin)->highresscale);
-	else if (thing->skin && ((skin_t *)thing->skin)->highresscale != FRACUNIT)
-		this_scale = FixedMul(this_scale, ((skin_t *)thing->skin)->highresscale);
 
 	spr_width = spritecachedinfo[lump].width;
 	spr_height = spritecachedinfo[lump].height;
