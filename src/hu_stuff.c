@@ -1472,11 +1472,13 @@ static void HU_drawChatLog(INT32 offset)
 
 	const fixed_t scale = (vid.width < 640) ? FRACUNIT : FRACUNIT/2;
 
+	/*
 	V_SetClipRect(
 		(chatx) << FRACBITS, (chat_topy) << FRACBITS,
 		(boxw) << FRACBITS, (chat_bottomy) <<FRACBITS,
 		V_SNAPTOBOTTOM|V_SNAPTOLEFT
 	);
+	*/
 
 	chat_bottomy += chat_topy - 2;
 
@@ -1511,7 +1513,7 @@ static void HU_drawChatLog(INT32 offset)
 			linescount++;
 		}
 
-		if (y + dy < chat_bottomy)
+		if ((y+dy+2 >= chat_topy) && (y+dy < (chat_bottomy)))
 		{
 			V_DrawStringScaled(
 				(x + 2) << FRACBITS,

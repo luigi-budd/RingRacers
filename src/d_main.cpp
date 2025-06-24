@@ -1719,6 +1719,7 @@ void D_SRB2Main(void)
 	mainwads++; W_VerifyFileMD5(mainwads, ASSET_HASH_UNLOCKS_PK3);					// unlocks.pk3
 	mainwads++; W_VerifyFileMD5(mainwads, ASSET_HASH_STAFFGHOSTS_PK3);				// staffghosts.pk3
 	mainwads++; W_VerifyFileMD5(mainwads, ASSET_HASH_SHADERS_PK3);					// shaders.pk3
+	mainwads++; // and another for luigibudd.pk3! :microsofthappy:
 #ifdef USE_PATCH_FILE
 	mainwads++; W_VerifyFileMD5(mainwads, ASSET_HASH_PATCH_PK3);					// patch.pk3
 #endif
@@ -1734,6 +1735,7 @@ void D_SRB2Main(void)
 	mainwads++; // unlocks.pk3
 	mainwads++; // staffghosts.pk3
 	mainwads++; // shaders.pk3
+	mainwads++; // ditto
 #ifdef USE_PATCH_FILE
 	mainwads++; // patch.pk3
 #endif

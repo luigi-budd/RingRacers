@@ -1332,6 +1332,7 @@ fixed_t M_GetBGSize(void);
 void M_PickMenuBGMap(void);
 void M_UpdateMenuBGImage(boolean forceReset);
 void M_DrawMenuBackground(void);
+void M_DrawWeirdRes(void);
 void M_DrawMenuForeground(void);
 void M_Drawer(void);
 void M_DrawGenericMenu(void);

@@ -148,7 +148,7 @@ menu_t OPTIONS_ProfileAccessibilityDef = {
 	&OPTIONS_EditProfileDef,
 	0,
 	OPTIONS_ProfileAccessibility,
-	145, 41,
+	145, 31,
 	SKINCOLOR_ULTRAMARINE, 0,
 	MBF_DRAWBGWHILEPLAYING,
 	"FILE",

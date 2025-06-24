@@ -28,7 +28,7 @@ static void draw_routine(void)
 		V_DrawRightAlignedThinString(
 			294 + tx,
 			84,
-			highlightflags,
+			V_SNAPTORIGHT|highlightflags,
 			va("(%s)", cv_kartspeed.string)
 		);
 	}
@@ -37,7 +37,7 @@ static void draw_routine(void)
 		V_DrawRightAlignedThinString(
 			294 + tx,
 			84,
-			highlightflags,
+			V_SNAPTORIGHT|highlightflags,
 			"(Time/Points)"
 		);
 	}
@@ -45,7 +45,7 @@ static void draw_routine(void)
 	V_DrawRightAlignedThinString(
 		294 + tx,
 		98,
-		!CV_IsSetToDefault(&cv_advertise) ? warningflags : highlightflags,
+		V_SNAPTORIGHT|(!CV_IsSetToDefault(&cv_advertise) ? warningflags : highlightflags),
 		va("(Advertise: %s)", cv_advertise.string)
 	);
 
