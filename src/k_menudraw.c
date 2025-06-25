@@ -8038,7 +8038,7 @@ challengedesc:
 		)
 	)
 	{
-		V_DrawCenteredThinString(BASEVIDWIDTH/2, 120 + 32, V_SNAPTOBOTTOM|V_SNAPTORIGHT, challengesmenu.unlockcondition);
+		V_DrawCenteredThinString(BASEVIDWIDTH/2, 120 + 32, V_SNAPTOBOTTOM, challengesmenu.unlockcondition);
 	}
 }
 
