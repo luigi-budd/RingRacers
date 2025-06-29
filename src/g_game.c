@@ -3170,6 +3170,10 @@ void G_FinishExitLevel(void)
 			// Restart cup here whenever we do Online GP
 			if (!worknetgame)
 			{
+				// we really shouldnt have to do this...
+				if (demo.recording && demo.willsave)
+					G_SaveDemo();
+				
 				// We have lives, just redo this one course.
 				G_SetRetryFlag();
 				return;

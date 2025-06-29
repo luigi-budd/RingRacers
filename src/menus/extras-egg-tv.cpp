@@ -28,6 +28,8 @@ std::unique_ptr<EggTV> g_egg_tv;
 void M_DrawEggTV()
 {
 	g_egg_tv->draw();
+	// lul
+	M_DrawWeirdRes();
 }
 
 boolean M_QuitEggTV()

@@ -3339,10 +3339,10 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	INT32 fy = LAPS_Y-14;
 	INT32 stickerwidth = 42;
 	INT32 secondoff = 41;
-	UINT8 *colormap;
+	UINT8 *colormap = NULL;
 
 	//Just set something here for now
-	colormap = R_GetTranslationColormap(TC_DEFAULT,SKINCOLOR_GREEN,GTC_CACHE);
+	// colormap = R_GetTranslationColormap(TC_DEFAULT,SKINCOLOR_GREEN,GTC_CACHE);
 
 	if (battleprisons)
 	{
