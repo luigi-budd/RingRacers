@@ -540,8 +540,6 @@ void SetLocalPlayerSkin(INT32 playernum, const char *skinname, consvar_t *cvar)
 	player_t *player = &players[playernum];
 	INT32 i;
 
-	CONS_Printf("SetLocalPlayerSkin...\n");
-
 	if (strcasecmp(skinname, "none"))
 	{
 		for (i = 0; i < numlocalskins; i++)
