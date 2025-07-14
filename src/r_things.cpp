@@ -130,12 +130,12 @@ static INT32 drawsegs_xrange_count = 0;
 //
 //
 //
-static void R_InstallSpriteLump(UINT16 wad,            // graphics patch
-                                UINT16 lump,
-                                size_t lumpid,      // identifier
-                                UINT8 frame,
-                                UINT8 rotation,
-                                UINT8 flipped)
+static void R_InstallSpriteLump(UINT16 wad,			// graphics patch
+								UINT16 lump,
+								size_t lumpid,	  // identifier
+								UINT8 frame,
+								UINT8 rotation,
+								UINT8 flipped)
 {
 	char cn = R_Frame2Char(frame), cr = R_Rotation2Char(rotation); // for debugging
 
@@ -255,11 +255,11 @@ static void R_InstallSpriteLump(UINT16 wad,            // graphics patch
 // (originally part of R_AddSpriteDefs)
 //
 // Pass: name of sprite : 4 chars
-//       spritedef_t
-//       wadnum         : wad number, indexes wadfiles[], where patches
-//                        for frames are found
-//       startlump      : first lump to search for sprite frames
-//       endlump        : AFTER the last lump to search
+//	   spritedef_t
+//	   wadnum		 : wad number, indexes wadfiles[], where patches
+//						for frames are found
+//	   startlump	  : first lump to search for sprite frames
+//	   endlump		: AFTER the last lump to search
 //
 // Returns true if the sprite was succesfully added
 //
@@ -393,8 +393,8 @@ boolean R_AddSingleSpriteDef(const char *sprname, spritedef_t *spritedef, UINT16
 
 		//check only after all initial pwads added
 		//if (spritedef->numframes == 0)
-		//    I_Error("R_AddSpriteDefs: no initial frames found for sprite %s\n",
-		//             namelist[i]);
+		//	I_Error("R_AddSpriteDefs: no initial frames found for sprite %s\n",
+		//			 namelist[i]);
 
 		// sprite already has frames, and is not replaced by this wad
 		return false;
@@ -439,13 +439,13 @@ boolean R_AddSingleSpriteDef(const char *sprname, spritedef_t *spritedef, UINT16
 				// if it was not loaded the two are LUMPERROR
 				if (sprtemp[frame].lumppat[rotation] == LUMPERROR)
 					I_Error("R_AddSingleSpriteDef: Sprite %.4s frame %c is missing rotations (1-%c mode)",
-					        sprname, R_Frame2Char(frame), ((sprtemp[frame].rotate & SRF_3DGE) ? 'G' : '8'));
+							sprname, R_Frame2Char(frame), ((sprtemp[frame].rotate & SRF_3DGE) ? 'G' : '8'));
 			break;
 		}
 	}
 
 	// allocate space for the frames present and copy sprtemp to it
-	if (spritedef->numframes &&             // has been allocated
+	if (spritedef->numframes &&			 // has been allocated
 		spritedef->numframes < maxframe)   // more frames are defined ?
 	{
 		Z_Free(spritedef->spriteframes);
@@ -482,7 +482,7 @@ void R_AddSpriteDefs(UINT16 wadnum)
 
 		end = W_CheckNumForNamePwad("S_END",wadnum,start);
 		if (end == INT16_MAX)
-			end = W_CheckNumForNamePwad("SS_END",wadnum,start);     //deutex compatib.
+			end = W_CheckNumForNamePwad("SS_END",wadnum,start);	 //deutex compatib.
 		break;
 	case RET_PK3:
 		start = W_CheckNumForFolderStartPK3("Sprites/", wadnum, 0);
@@ -746,7 +746,7 @@ void R_DrawFlippedMaskedColumn(drawcolumndata_t* dc, column_t *column, column_t 
 		topdelta = lengthcol-column->length-topdelta;
 		topscreen = sprtopscreen + spryscale*topdelta;
 		bottomscreen = sprbotscreen == INT32_MAX ? topscreen + spryscale*column->length
-		                                      : sprbotscreen + spryscale*column->length;
+											  : sprbotscreen + spryscale*column->length;
 
 		dc->yl = (topscreen+FRACUNIT-1)>>FRACBITS;
 		dc->yh = (bottomscreen-1)>>FRACBITS;
@@ -965,7 +965,7 @@ static void R_DrawVisSprite(vissprite_t *vis)
 	else if (vis->transmap)
 	{
 		R_SetColumnFunc(COLDRAWFUNC_FUZZY, false);
-		dc.transmap = vis->transmap;    //Fab : 29-04-98: translucency table
+		dc.transmap = vis->transmap;	//Fab : 29-04-98: translucency table
 	}
 	else if (dc.translation) // translate green skin to another color
 		R_SetColumnFunc(COLDRAWFUNC_TRANS, false);
@@ -1166,7 +1166,7 @@ static void R_DrawPrecipitationVisSprite(vissprite_t *vis)
 	if (vis->transmap)
 	{
 		R_SetColumnFunc(COLDRAWFUNC_FUZZY, false);
-		dc.transmap = vis->transmap;    //Fab : 29-04-98: translucency table
+		dc.transmap = vis->transmap;	//Fab : 29-04-98: translucency table
 	}
 
 	dc.colormap = colormaps;
@@ -1507,14 +1507,14 @@ static void R_ProjectDropShadow(
 	shadow->gz = shadow->gzt - patch->height * shadowyscale;
 	shadow->texturemid = FixedMul(interp.scale, FixedDiv(shadow->gzt - viewz, shadowyscale));
 	
-    skin_t *work_skin = NULL;
-    if (R_MobjHasAnySkin(thing))
-        work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
-    
-    if (work_skin && work_skin->highresscale != FRACUNIT)
+	skin_t *work_skin = NULL;
+	if (R_MobjHasAnySkin(thing))
+		work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
+	    
+	if (work_skin && work_skin->highresscale != FRACUNIT)
 		shadow->texturemid = FixedMul(shadow->texturemid, work_skin->highresscale);
 	
-    shadow->scalestep = 0;
+	shadow->scalestep = 0;
 	shadow->shear.tan = shadowskew; // repurposed variable
 
 	shadow->mobj = thing; // Easy access! Tails 06-07-2002
@@ -1728,10 +1728,10 @@ static void R_ProjectSprite(mobj_t *thing)
 	fixed_t sortscale, sortsplat = 0;
 	fixed_t sort_x = 0, sort_y = 0, sort_z;
 
-    skin_t *work_skin = NULL;
-    if (R_MobjHasAnySkin(thing))
-        work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
-    
+	skin_t *work_skin = NULL;
+	if (R_MobjHasAnySkin(thing))
+		work_skin = (skin_t *)(thing->localskin ? thing->localskin : thing->skin);
+		
 	INT32 x1, x2;
 	INT32 x1test = 0, x2test = 0;
 
@@ -1923,8 +1923,8 @@ static void R_ProjectSprite(mobj_t *thing)
 	if (sprframe->rotate == SRF_SINGLE)
 	{
 		// use single rotation for all views
-		rot = 0;                        //Fab: for vis->patch below
-		lump = sprframe->lumpid[0];     //Fab: see note above
+		rot = 0;						//Fab: for vis->patch below
+		lump = sprframe->lumpid[0];	 //Fab: see note above
 		flip = sprframe->flip; 			// Will only be 0 or 0xFFFF
 	}
 	else
@@ -1957,7 +1957,7 @@ static void R_ProjectSprite(mobj_t *thing)
 	spr_topoffset = spritecachedinfo[lump].topoffset;
 
 	//Fab: lumppat is the lump number of the patch to use, this is different
-	//     than lumpid for sprites-in-pwad : the graphics are patched
+	//	 than lumpid for sprites-in-pwad : the graphics are patched
 	patch = static_cast<patch_t*>(W_CachePatchNum(sprframe->lumppat[rot], PU_SPRITE));
 
 #ifdef ROTSPRITE
@@ -2684,7 +2684,7 @@ static void R_ProjectPrecipitationSprite(precipmobj_t *thing)
 #endif
 
 	// use single rotation for all views
-	lump = sprframe->lumpid[0];     //Fab: see note above
+	lump = sprframe->lumpid[0];	 //Fab: see note above
 
 	// calculate edges of the shape
 	tx -= FixedMul(spritecachedinfo[lump].offset, this_scale);
@@ -2772,7 +2772,7 @@ static void R_ProjectPrecipitationSprite(precipmobj_t *thing)
 		vis->startfrac += vis->xiscale*(vis->x1-x1);
 
 	//Fab: lumppat is the lump number of the patch to use, this is different
-	//     than lumpid for sprites-in-pwad : the graphics are patched
+	//	 than lumpid for sprites-in-pwad : the graphics are patched
 	vis->patch = static_cast<patch_t*>(W_CachePatchNum(sprframe->lumppat[0], PU_SPRITE));
 	vis->bright = R_CacheSpriteBrightMap(&spriteinfo[thing->sprite],
 			thing->frame & FF_FRAMEMASK);
@@ -2908,12 +2908,12 @@ void R_AddPrecipitationSprites(void)
 //
 static void R_SortVisSprites(vissprite_t* vsprsortedhead, UINT32 start, UINT32 end)
 {
-	UINT32       i, count = 0;
+	UINT32	   i, count = 0;
 	vissprite_t *ds, *dsprev, *dsnext, *dsfirst;
 	vissprite_t *best = NULL;
 	vissprite_t  unsorted;
-	fixed_t      bestscale;
-	INT32        bestdispoffset;
+	fixed_t	  bestscale;
+	INT32		bestdispoffset;
 
 	dsfirst = &unsorted;
 	dsprev = dsfirst;
@@ -3209,7 +3209,7 @@ static void R_CreateDrawNodes(maskcount_t* mask, drawnode_t* head, boolean temps
 
 				// Effective height may be different for each comparison in the case of slopes
 				planeobjectz = P_GetZAt(r2->plane->slope, rover->gx, rover->gy, r2->plane->height);
-				planecameraz = P_GetZAt(r2->plane->slope,     viewx,     viewy, r2->plane->height);
+				planecameraz = P_GetZAt(r2->plane->slope,	 viewx,	 viewy, r2->plane->height);
 
 				// bird: if any part of the sprite peeks in front the plane
 				if (planecameraz < viewz)
@@ -3269,13 +3269,13 @@ static void R_CreateDrawNodes(maskcount_t* mask, drawnode_t* head, boolean temps
 				// are added after segs in the list.
 #if 0
 				topplaneobjectz = P_GetFFloorTopZAt   (r2->ffloor, rover->gx, rover->gy);
-				topplanecameraz = P_GetFFloorTopZAt   (r2->ffloor,     viewx,     viewy);
+				topplanecameraz = P_GetFFloorTopZAt   (r2->ffloor,	 viewx,	 viewy);
 				botplaneobjectz = P_GetFFloorBottomZAt(r2->ffloor, rover->gx, rover->gy);
-				botplanecameraz = P_GetFFloorBottomZAt(r2->ffloor,     viewx,     viewy);
+				botplanecameraz = P_GetFFloorBottomZAt(r2->ffloor,	 viewx,	 viewy);
 
 				if ((topplanecameraz > viewz && botplanecameraz < viewz) ||
-				    (topplanecameraz < viewz && rover->gzt < topplaneobjectz) ||
-				    (botplanecameraz > viewz && rover->gz > botplaneobjectz))
+					(topplanecameraz < viewz && rover->gzt < topplaneobjectz) ||
+					(botplanecameraz > viewz && rover->gz > botplaneobjectz))
 #endif
 				{
 					entry = R_CreateDrawNode(NULL);
@@ -3425,7 +3425,7 @@ void R_InitDrawNodes(void)
 //
 //Fab : 26-04-98:
 // NOTE : uses con_clipviewtop, so that when console is on,
-//        don't draw the part of sprites hidden under the console
+//		don't draw the part of sprites hidden under the console
 static void R_DrawSprite(vissprite_t *spr)
 {
 	mfloorclip = spr->clipbot;
@@ -3581,7 +3581,7 @@ void R_ClipVisSprite(vissprite_t *spr, INT32 x1, INT32 x2, portal_t* portal)
 			(h >>= FRACBITS) < viewheight)
 		{
 			if (mh <= 0 || (phs != -1 && viewz > sectors[phs].floorheight))
-			{                          // clip bottom
+			{						  // clip bottom
 				for (x = x1; x <= x2; x++)
 					if (spr->clipbot[x] == CLIP_UNDEF || h < spr->clipbot[x])
 						spr->clipbot[x] = (INT16)h;
@@ -3599,12 +3599,12 @@ void R_ClipVisSprite(vissprite_t *spr, INT32 x1, INT32 x2, portal_t* portal)
 			(h >>= FRACBITS) < viewheight)
 		{
 			if (phs != -1 && viewz >= sectors[phs].ceilingheight)
-			{                         // clip bottom
+			{						 // clip bottom
 				for (x = x1; x <= x2; x++)
 					if (spr->clipbot[x] == CLIP_UNDEF || h < spr->clipbot[x])
 						spr->clipbot[x] = (INT16)h;
 			}
-			else                       // clip top
+			else					   // clip top
 			{
 				for (x = x1; x <= x2; x++)
 					if (spr->cliptop[x] == CLIP_UNDEF || h > spr->cliptop[x])
