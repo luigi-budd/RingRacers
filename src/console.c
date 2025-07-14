@@ -1866,6 +1866,9 @@ static void CON_DrawConsole(void)
 //
 static boolean CON_GamestateDrawHudLines(void)
 {
+	// ALWAYS draw hudlines when devmode is on
+	if (cht_debug) return true;
+
 	switch (gamestate)
 	{
 		case GS_LEVEL:

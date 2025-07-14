@@ -137,6 +137,7 @@ void M_EndModeAttackRun(void)
 	// Return to the menu.
 	D_ClearState();
 	M_StartControlPanel();
+	M_ResetOptions();
 }
 
 // Replay Playback Menu

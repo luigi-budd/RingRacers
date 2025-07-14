@@ -354,7 +354,7 @@ void M_CharacterSelectInit(void)
 		setup_player[i].profilen_slide.start = 0;
 		setup_player[i].profilen_slide.dist = 0;
 
-		// If we're on prpfile select, skip straight to CSSTEP_CHARS
+		// If we're on profile select, skip straight to CSSTEP_CHARS
 		// do the same if we're midgame, but make sure to consider splitscreen properly.
 		if (optionsmenu.profile && i == 0)
 		{
