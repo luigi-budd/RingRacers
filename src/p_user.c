@@ -3177,6 +3177,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 {
 	static boolean lookbackactive[MAXSPLITSCREENPLAYERS];
 	static UINT8 lookbackdelay[MAXSPLITSCREENPLAYERS];
+	static fixed_t slope_adjustments[MAXSPLITSCREENPLAYERS];
 	UINT8 num;
 	angle_t angle = 0, focusangle = 0, focusaiming = 0, pitch = 0;
 	fixed_t x, y, z, dist, distxy, distz, viewpointx, viewpointy, camspeed, camdist, camheight, pviewheight;
@@ -3520,6 +3521,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		}
 	}
 
+	fixed_t dest_slopeadjust = 0;
 	if (mo->standingslope)
 	{
 		pitch = (angle_t)FixedMul(P_ReturnThrustX(mo, thiscam->angle - mo->standingslope->xydirection, FRACUNIT), (fixed_t)mo->standingslope->zangle);
@@ -3527,14 +3529,22 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		if (mo->eflags & MFE_VERTICALFLIP)
 		{
 			if (pitch >= ANGLE_180)
+			{
+				if (cv_flipcam.value)
+					dest_slopeadjust = -((360*FRACUNIT - AngleFixed(pitch)) / 3);
 				pitch = 0;
+			}
 		}
 		else
 		{
 			if (pitch < ANGLE_180)
+			{
+				dest_slopeadjust = (AngleFixed(pitch) / 3);
 				pitch = 0;
+			}
 		}
 	}
+	slope_adjustments[num] += FixedMul(dest_slopeadjust - slope_adjustments[num], camspeed/4);
 
 	pitch = thiscam->pitch + (angle_t)FixedMul(pitch - thiscam->pitch, camspeed/4);
 
@@ -3594,6 +3604,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	}
 
 	z += player->cameraOffset;
+	z += slope_adjustments[num];
 
 	// point viewed by the camera
 	// this point is just 64 unit forward the player
@@ -3660,7 +3671,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	}
 	else
 	{
-		angle = R_PointToAngle2(0, thiscam->z, dist, mo->z + player->mo->height + player->cameraOffset);
+		angle = R_PointToAngle2(0, thiscam->z - slope_adjustments[num], dist, mo->z + player->mo->height + player->cameraOffset);
 		if (thiscam->pitch >= ANGLE_180 && thiscam->pitch < angle)
 			angle -= (angle - thiscam->pitch)/2;
 	}
