@@ -87,6 +87,9 @@ extern consvar_t cv_kartbot;
 extern consvar_t cv_karteliminatelast;
 extern consvar_t cv_thunderdome;
 extern consvar_t cv_kartusepwrlv;
+extern consvar_t cv_tinyminimapheads; // yes this is just from srb2k saturn lol
+extern consvar_t cv_bigportraits;
+extern consvar_t cv_extendedspeedometer; // and this is also from noire
 #ifdef DEVELOP
 	extern consvar_t cv_kartencoremap;
 #endif

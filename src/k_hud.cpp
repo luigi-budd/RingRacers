@@ -2549,14 +2549,15 @@ void PositionFacesInfo::draw_1p()
 				colormap = R_GetTranslationColormap(workingskin, static_cast<skincolornum_t>(players[rankplayer[i]].mo->color), GTC_CACHE);
 
 			//hires ranking portraits
-			//V_DrawMappedPatch(FACE_X + xoff, Y + yoff, V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag, faceprefix[workingskin][FACE_RANK], colormap);
-			V_DrawFixedPatch((FACE_X + xoff)<<FRACBITS,
-				(Y + yoff)<<FRACBITS,
-				FRACUNIT >> 1,
-				V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag,
-				(iwaslocal ? localfaceprefix : faceprefix)[workingskin][FACE_WANTED], colormap
-			);
-			//(x)<<FRACBITS, (y)<<FRACBITS, FRACUNIT, s, p, c)
+			if (cv_bigportraits.value)
+				V_DrawFixedPatch((FACE_X + xoff)<<FRACBITS,
+					(Y + yoff)<<FRACBITS,
+					FRACUNIT >> 1,
+					V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag,
+					(iwaslocal ? localfaceprefix : faceprefix)[workingskin][FACE_WANTED], colormap
+				);
+			else
+				V_DrawMappedPatch(FACE_X + xoff, Y + yoff, V_HUDTRANS|V_SLIDEIN|V_SNAPTOLEFT|flipflag, (iwaslocal ? localfaceprefix : faceprefix)[workingskin][FACE_RANK], colormap);
 
 			if (LUA_HudEnabled(hud_battlebumpers))
 			{
@@ -3187,8 +3188,16 @@ static void K_drawRingCounter(boolean gametypeinfoshown)
                 skin = stplyr->localskin - 1;
             }
 
-            V_DrawMappedPatch(LAPS_X+46, fy-5, V_HUDTRANS|V_SLIDEIN|splitflags,
-                (yeahimlocal ? localfaceprefix : faceprefix)[skin][FACE_RANK], colormap);
+			if (cv_bigportraits.value)
+				V_DrawFixedPatch((LAPS_X+46)<<FRACBITS,
+					(fy-5)<<FRACBITS,
+					FRACUNIT >> 1,
+					V_HUDTRANS|V_SLIDEIN|splitflags,
+					(yeahimlocal ? localfaceprefix : faceprefix)[skin][FACE_WANTED], colormap
+				);
+			else
+	            V_DrawMappedPatch(LAPS_X+46, fy-5, V_HUDTRANS|V_SLIDEIN|splitflags,
+	                (yeahimlocal ? localfaceprefix : faceprefix)[skin][FACE_RANK], colormap);
 			
             SINT8 livescount = 0;
 			if (stplyr->lives > 0)
@@ -3414,7 +3423,7 @@ static void K_drawKartSpeedometer(boolean gametypeinfoshown)
 	V_DrawFixedPatch((LAPS_X+29)*FRACUNIT, (fy)<<FRACBITS, FRACUNIT, V_HUDTRANS|V_SLIDEIN|splitflags, kp_speedometerlabel[labeln],colormap);
 
 	//still draw percentage if we're using something else
-	if (cv_kartspeedometer.value != 1)
+	if (cv_kartspeedometer.value != 1 && cv_extendedspeedometer.value)
 	{
 		//Copy shit lmao
 		convSpeed = (stplyr->speed * 100) / K_GetKartSpeed(stplyr, false, true); // Based on top speed!
@@ -4356,8 +4365,11 @@ position_t K_GetKartObjectPosToMinimapPos(fixed_t objx, fixed_t objy)
 	return (position_t){amnumxpos, amnumypos};
 }
 
-static void K_drawKartMinimapIcon(fixed_t objx, fixed_t objy, INT32 hudx, INT32 hudy, INT32 flags, patch_t *icon, UINT8 *colormap)
-{
+static void K_drawKartMinimapIcon(
+	fixed_t objx, fixed_t objy,
+	INT32 hudx, INT32 hudy, INT32 flags,
+	patch_t *icon, UINT8 *colormap
+) {
 	// amnum xpos & ypos are the icon's speed around the HUD.
 	// The number being divided by is for how fast it moves.
 	// The higher the number, the slower it moves.
@@ -4367,13 +4379,14 @@ static void K_drawKartMinimapIcon(fixed_t objx, fixed_t objy, INT32 hudx, INT32 
 	
 	position_t amnumpos;
 	INT32 amxpos, amypos;
+	const INT8 scalar = cv_tinyminimapheads.value ? 4 : 2;
 	
 	amnumpos = K_GetKartObjectPosToMinimapPos(objx, objy);
 
-	amxpos = amnumpos.x + ((hudx - (SHORT(icon->width))/2)<<FRACBITS);
-	amypos = amnumpos.y + ((hudy - (SHORT(icon->height))/2)<<FRACBITS);
+	amxpos = amnumpos.x + ((hudx - (SHORT(icon->width))/scalar)<<FRACBITS);
+	amypos = amnumpos.y + ((hudy - (SHORT(icon->height))/scalar)<<FRACBITS);
 
-	V_DrawFixedPatch(amxpos, amypos, FRACUNIT, flags, icon, colormap);
+	V_DrawFixedPatch(amxpos, amypos, cv_tinyminimapheads.value ? FRACUNIT/2 : FRACUNIT, flags, icon, colormap);
 }
 
 static void K_drawKartMinimapDot(fixed_t objx, fixed_t objy, INT32 hudx, INT32 hudy, INT32 flags, UINT8 color, UINT8 size)
@@ -4492,6 +4505,8 @@ INT32 K_GetMinimapSplitFlags(const boolean usingProgressBar)
 }
 
 #define ICON_DOT_RADIUS (10)
+#define ICON_DOT_RADIUS_SMALL (5)
+#define ICON_DOT_CUR_RADIUS (cv_tinyminimapheads.value ? ICON_DOT_RADIUS_SMALL : ICON_DOT_RADIUS)
 
 static void K_drawKartMinimap(void)
 {
@@ -4987,13 +5002,13 @@ static void K_drawKartMinimap(void)
 					ang = ANGLE_180 - ang;
 
 				K_drawKartMinimapIcon(
-						interpx,
-						interpy,
-						x + FixedMul(FCOS(ang), ICON_DOT_RADIUS),
-						y - FixedMul(FSIN(ang), ICON_DOT_RADIUS),
-						splitflags,
-						kp_minimapdot,
-						colormap
+					interpx,
+					interpy,
+					x + FixedMul(FCOS(ang), ICON_DOT_CUR_RADIUS),
+					y - FixedMul(FSIN(ang), ICON_DOT_CUR_RADIUS),
+					splitflags,
+					kp_minimapdot,
+					colormap
 				);
 			}
 		}

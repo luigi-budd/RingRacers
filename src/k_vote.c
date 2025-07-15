@@ -508,19 +508,20 @@ static void Y_DrawVoteThumbnail(fixed_t center_x, fixed_t center_y, fixed_t widt
 
 		if (playerID < MAXPLAYERS)
 		{
+			const INT8 facepatch = (cv_bigportraits.value ? FACE_WANTED : FACE_RANK);
 			UINT8 *playerMap = R_GetTranslationColormap(players[playerID].skin, players[playerID].skincolor, GTC_CACHE);
-			patch_t *playerPatch = faceprefix[players[playerID].skin][FACE_RANK];
+			patch_t *playerPatch = faceprefix[players[playerID].skin][facepatch];
 
 			if (players[playerID].localskin)
 			{
 				playerMap = R_GetTranslationColormap(players[playerID].localskin - 1, players[playerID].skincolor, GTC_CACHE);
-				playerPatch = ((players[playerID].skinlocal) ? localfaceprefix : faceprefix)[players[playerID].localskin - 1][FACE_RANK];
+				playerPatch = ((players[playerID].skinlocal) ? localfaceprefix : faceprefix)[players[playerID].localskin - 1][facepatch];
 			}
 
 			V_DrawFixedPatch(
 				(fx + fw - whiteSq + dupx) * FRACUNIT,
 				(fy + fh - whiteSq + dupy) * FRACUNIT,
-				FRACUNIT, flags|V_NOSCALESTART,
+				cv_bigportraits.value ? FRACUNIT/2 : FRACUNIT, flags|V_NOSCALESTART,
 				playerPatch, playerMap
 			);
 		}
@@ -1041,7 +1042,7 @@ void Y_VoteDrawer(void)
 			2*FRACUNIT,
 			(BASEVIDHEIGHT - (2+8))*FRACUNIT,
 			FRACUNIT,
-			0, NULL,
+			V_SNAPTOLEFT|V_SNAPTOBOTTOM, NULL,
 			OPPRF_FONT,
 			va("%d", tickDown)
 		);

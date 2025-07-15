@@ -1593,8 +1593,9 @@ static fixed_t Y_DrawMapTitle(void)
 		name
 	) + (16 * FRACUNIT);
 
-	fixed_t x = BASEVIDWIDTH * FRACUNIT;
+	fixed_t x = (vid.width / vid.dupx) * FRACUNIT;
 
+	Y_DrawMapTitleString(x + w, name);
 	while (x > -w)
 	{
 		Y_DrawMapTitleString(x, name);
@@ -1640,15 +1641,19 @@ void Y_IntermissionDrawer(void)
 	// Draw the background
 	K_DrawMapThumbnail(0, 0, FixedMul(640*FRACUNIT,FixedDiv((vid.width/vid.dupx)*FRACUNIT,640*FRACUNIT)), (data.encore ? V_FLIP : 0)|V_SNAPTOLEFT|V_SNAPTOTOP, prevmap, bgcolor);
 
+	//this is UGLY!! but it has to be here so it looks like 1 continous strip
+	V_DrawFixedPatch(-mqscroll - mqloop, 154<<FRACBITS, FRACUNIT, V_SUBTRACT|V_SNAPTOBOTTOM, rrmq, NULL);
 	for (x = -mqscroll; x < (vid.width * FRACUNIT); x += mqloop)
 	{
 		V_DrawFixedPatch(x, 154<<FRACBITS, FRACUNIT, V_SUBTRACT|V_SNAPTOBOTTOM, rrmq, NULL);
 	}
 
+	// kill me
 	V_DrawFixedPatch(chkscroll + chkloop*2, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
-	V_DrawFixedPatch(chkscroll + chkloop, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
-	V_DrawFixedPatch(chkscroll, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
-	V_DrawFixedPatch(chkscroll - chkloop, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll + chkloop  , 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll            , 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll - chkloop  , 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
+	V_DrawFixedPatch(chkscroll - chkloop*2, 0, FRACUNIT, V_SUBTRACT|V_SNAPTOTOP, rbgchk, NULL);
 
 	fixed_t ttlloop = Y_DrawMapTitle();
 

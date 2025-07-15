@@ -531,6 +531,10 @@ consvar_t cv_kartvoices = Server("tauntvoices", "On").on_off();
 consvar_t cv_kartspeedometer = Server("speedometer", "Percentage").values({{0, "Off"}, {1, "Percentage"}, {2, "Kilometers"}, {3, "Miles"}, {4, "Fracunits"}}); // use tics in display
 consvar_t cv_kicktime = Server("kicktime", "20").values(CV_Unsigned);
 
+consvar_t cv_tinyminimapheads = Player("smallminimapplayers", "On").on_off();
+consvar_t cv_bigportraits = Player("bigportraits", "On").on_off();
+consvar_t cv_extendedspeedometer = Player("extendedspeedometer", "On").on_off();
+
 void MasterServer_OnChange(void);
 consvar_t cv_masterserver = Server("masterserver", "https://ms.kartkrew.org/ms/api").onchange(MasterServer_OnChange);
 consvar_t cv_masterserver_nagattempts = Server("masterserver_nagattempts", "5").values(CV_Unsigned);
