@@ -4379,7 +4379,7 @@ static void K_drawKartMinimapIcon(
 	
 	position_t amnumpos;
 	INT32 amxpos, amypos;
-	const INT8 scalar = cv_tinyminimapheads.value ? 4 : 2;
+	const UINT8 scalar = cv_tinyminimapheads.value ? 4 : 2;
 	
 	amnumpos = K_GetKartObjectPosToMinimapPos(objx, objy);
 

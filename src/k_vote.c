@@ -508,7 +508,7 @@ static void Y_DrawVoteThumbnail(fixed_t center_x, fixed_t center_y, fixed_t widt
 
 		if (playerID < MAXPLAYERS)
 		{
-			const INT8 facepatch = (cv_bigportraits.value ? FACE_WANTED : FACE_RANK);
+			const UINT8 facepatch = (cv_bigportraits.value ? FACE_WANTED : FACE_RANK);
 			UINT8 *playerMap = R_GetTranslationColormap(players[playerID].skin, players[playerID].skincolor, GTC_CACHE);
 			patch_t *playerPatch = faceprefix[players[playerID].skin][facepatch];
 
