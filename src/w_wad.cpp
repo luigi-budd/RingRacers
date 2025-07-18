@@ -759,7 +759,7 @@ static UINT16 W_InitFileError (const char *filename, boolean exitworthy)
 	if (exitworthy)
 	{
 #ifdef _DEBUG
-		CONS_Error(va("%s was not found or not valid.\nCheck the log for more details.\n", filename));
+		CONS_Error(va("%s was not found or not valid. (Check the Github?)\nCheck the log for more details.\n", filename));
 #else
 		I_Error("%s was not found or not valid.\nCheck the log for more details.\n", filename);
 #endif
